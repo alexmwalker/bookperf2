@@ -1,0 +1,11 @@
+/* This file is for over-rides for generated CSS we don't want to change directly- chiefly Prism at this stage - 
+ Alex Walker
+*/
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {  // Prism adds a 50% white bg to certain characters. It looks weird. This kills it.
+	background: hsla(0, 0%, 100%, 0);
+}

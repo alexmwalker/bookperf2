@@ -1,0 +1,205 @@
+body {
+    @include font-body;
+}
+
+code,
+pre {
+    @include font-monospace;
+    white-space: pre-wrap;
+}
+
+/* stop things breaking in weird places */
+
+h1,
+h2,
+h3,
+h4 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+}
+
+
+h1 + p,
+h2 + p,
+h3 + p {
+    page-break-before: avoid;
+}
+
+.chapter-page {
+    page-break-inside: avoid;
+    page-break-after: always;
+}
+
+table,
+figure,
+.box {
+    page-break-inside: avoid;
+}
+
+
+
+.chapter {
+    padding-top: 0px;
+    page-break-before: always;
+}
+
+.ch-head {
+    font-size: 21pt;
+    position: absolute;
+    width: 30%;
+    font-family: 'Raleway';
+    //outline: 1px blue dashed;
+    color: #9ab;
+    //height: 200px;
+    font-weight: 600; //color: color(theme,blue);
+    margin-top: 25rem;
+    right: 0%;
+    text-align: center; 
+    page-break-after: avoid;
+}
+
+.ch-head::before {
+    // the chapter number
+    content: counter(chapternum); //color: color(theme,blue);
+    font-size: 120pt;
+    color: #445266;
+    line-height: 100%;
+    vertical-align: middle;
+    position: absolute;
+    top: 2rem;
+    height: 1.5em;
+    left: 0;
+    text-align: center;
+    width: 100%;
+    //outline: 1px red dashed;
+}
+
+.ch-head + h1 {
+    margin-top: 28rem;
+    font-size: 48px;
+    position: relative;
+    float: right;
+    border-right: 1px solid #999;
+    line-height: 100%;
+    color: #334455;
+    margin-right: 30%;
+    //outline: 1px red dashed;
+    text-align: right;
+    padding-right: 2rem;
+    position: relative; //top: -300px;
+    page-break-before: never; // stay connected to the author H3
+    page-break-after: avoid;
+}
+
+.ch-head + h1 + h3 {
+    // Every chapter header MUST BE followed by a H3 author which will then create the page break. It can be empty if there is no author credit, but it must be there.
+    
+    margin: 0 30% 3rem 0;
+    font-size: 24px;
+    line-height: 100%;
+    padding-right: 2rem;
+    color: #9ab;
+    letter-spacing: 0.5px;
+    text-align: right;
+    //outline: 1px red dashed;
+    page-break-before: avoid;
+    page-break-after: always;
+}
+
+.ch-head + h1 + h3 + * {
+    //outline: 1px green dashed;
+    clear: both;
+    page-break-before: always;
+}
+
+/*
+h1 {
+
+    font-family: font(title, family);
+    font-weight: bold;
+    font-size: 21pt;
+    color: color(theme, black);
+    display: inline-block;
+    //border-bottom: 1px solid color(theme,orange);
+    margin-left: -30pt;
+    padding: 0 0 0 30pt;
+    line-height: .8;
+}
+
+h2 {
+    font-family: font(title, family);
+    font-weight: bold;
+    font-size: 17pt;
+    color: color(theme, black);
+    display: inline-block;
+    //border-bottom: 1px solid color(theme,orange);
+    margin-left:-30pt;
+    margin-bottom: 0;
+    padding: 0 0 0 30pt;
+    line-height: .8;
+}
+*/
+
+h2 code {
+    font-size: 90%;
+}
+
+.front h2 {
+    color: color(theme, black); //font-size: 14pt;
+    padding: 0;
+    margin: 0;
+    border: none;
+    display: block;
+    line-height: 1.5;
+}
+
+.front h2 + p {
+    margin-top: 0;
+    padding-top: 0;
+}
+
+/*
+h3 {
+  color: color(theme, black);
+  margin-bottom: 0;
+}
+
+h3, h4, h5, h6 {
+    font-family: font(title, family);
+    font-weight: bold;
+    font-size: 14pt;
+}
+*/
+
+/* lists */
+
+ul,
+ol {
+    padding-left: 0;
+    margin-left: 0;
+}
+
+li {
+    margin-left: 20px;
+}
+
+ul li {
+    list-style-image: url(../images/bullet.png);
+}
+
+dt {
+    float: left;
+    clear: left;
+    width: 90pt;
+    font-weight: bold;
+}
+
+dd {
+    margin: 0 0 0 90pt;
+}
+
+dt code {
+    font-weight: bold;
+}
+
+/* tables */

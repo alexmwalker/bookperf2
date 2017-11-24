@@ -1,0 +1,244 @@
+/* defining things that might change from book to book */
+$book-title: "Front End Performance";
+$cover-color: #A8CE35;
+/* path to book folder */
+//$local-path: "/Users/simon/Documents/sp-book-print-css/";
+$local-path: "/Users/alexmwalker/Sites/PrinceXML-V1/PrinceXML/sp-book-print-css/";
+
+/* page sizing information */
+
+$page-width: 8in;
+$page-height: 10in;
+$spread-left-margin: 22mm 25mm 15mm 20mm;
+$spread-right-margin: 22mm 20mm 15mm 25mm;
+
+
+
+$base-font-size: 12pt;                      // works out to be 16px on screen
+$base-line-height: $base-font-size * 1.5;
+$base-grid-height: $base-line-height / 2;   // two gridlines for each base font
+
+@import url('https://fonts.googleapis.com/css?family=Libre+Franklin|Raleway');
+
+
+/* typography
+fonts are imported in _fonts.scss -- but
+*/
+/* fonts as a Sass Map so we can do things like
+font-family: font(body, family);
+ */
+$fonts: (
+    body: (
+        family: "Libre Franklin",
+        size: $base-font-size,
+        weight: normal,
+        line-height: 1.5
+    ),
+    title: (
+        family: Raleway, sans-serif,
+        size: 24pt,
+        weight: normal,
+        line-height: 1.5
+    ),
+    code: (
+        family: monospace,
+        size: .8rem,
+        weight: normal,
+        line-height: 1.5
+    ),
+    footnotes: (
+        family: "Libre Franklin",
+        size: 9pt,
+        weight: normal,
+        line-height: 1.5
+    ),
+    small: (
+      family: "Libre Franklin",
+      size: 9pt,
+      weight: normal,
+      line-height: 1.5
+    )
+);
+
+
+
+/* colors as a Sass Map so we can do things like
+color: color(theme);
+color: color(theme, orange);
+color: color(backgrounds, codeblock); */
+$colors: (
+    theme: (
+        default: #000000,
+        orange: #bc6f29,
+        blue: #005288,
+        white: #fff,
+        black: #333,
+        gray: #777
+    ),
+    backgrounds: (
+        default: #ffffff,
+        codeblock: #d6deeb,
+        box-title: rgb(235, 242, 250),
+        box-body: rgb(245, 250, 255),
+        codeheading: #bbc9e0,
+        table-row: #ededdd,
+        table-header: #d6deeb
+    )
+);
+
+$title-padding: 0.2em 0.5em;
+$box-padding: 0.2em 0.5em;
+$code-padding: 0.2em 0.5em 0;
+
+// base grid
+
+
+html{
+   font-size: $base-font-size;
+   line-height: $base-line-height;
+}
+
+body, .article {
+  font-family: 'Libre Franklin', serif;
+  font-weight: 300;
+  color: #333;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  max-width: 700px;
+  margin: auto;
+}
+p {
+    font-size: 1rem;
+    font-family: 'Libre Franklin', serif;
+    line-height: 1.5rem;
+    color: #333;
+}
+h1, .h1 {
+  font-family: Raleway, sans-serif;
+  font-weight: 800;
+  font-size: 2.4375rem;
+  line-height: 3rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+h2, .h2 {
+  font-family: Raleway, sans-serif;
+  font-weight: 600;
+  font-size: 1.5625rem;
+  line-height: 3rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0rem;
+}
+h3, .h3 {
+  font-family: Raleway, sans-serif;
+  font-size: 1.25rem;
+  line-height: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+h4, .h4 {
+  font-size: 1.15rem;
+  line-height: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+h5, .h5 {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0rem;
+}
+p, ul, ol, pre, table, blockquote {
+  margin-top: 0rem;
+  margin-bottom: 1.5rem;
+}
+ul ul, ol ol, ul ol, ol ul {
+  margin-top: 0rem;
+  margin-bottom: 0rem;
+}
+
+/* Let's make sure all's aligned */
+hr, .hr {
+  border: 1px solid;
+  margin: -1px 0;
+}
+a, b, i, strong, em, small, code {
+  //line-height: 0;
+}
+sub, sup {
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+sup {
+  top: -0.5em;
+}
+sub {
+  bottom: -0.25em;
+}
+
+ol li{
+    line-height: 2.25rem;
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  counter-increment: step-counter;
+  //margin-bottom: 10px;
+}
+
+ol li::before {
+  content: counter(step-counter);
+  margin: .25rem 1rem 0 0;
+  display: block;
+  float: left;
+  font-size: 80%;
+  background-color: rgb(0,200,200);
+  background: #ddeeff;
+  color: #778899;
+  font-weight: bold;
+  width: 1.75rem;
+  line-height: 1.75rem;
+  //padding: 3px 8px;
+  border-radius: 50%;
+  text-align: center;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* GRID  -- uncomment for typography/layout tuning */
+/*
+body {
+     position: relative;
+ }
+ body:active:after {
+     display: none;
+ }
+
+ body:after {
+     background: linear-gradient(to bottom, rgba(200, 225, 255, 0.6) 1px, transparent 1px);
+     background-size: $base-line-height $base-line-height;
+     bottom: 0;
+     margin-top: 0px;
+     content: '';
+     display: block;
+     height: auto;
+     left: 0;
+     pointer-events: none;
+     position: absolute;
+     right: 0;
+     top: 0;
+     width: auto;
+     z-index: 9999;
+ }
+*/

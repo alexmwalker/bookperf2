@@ -1,0 +1,312 @@
+<div class="chapter"><div class="ch-head">Chapter</div>    <h1 class="chaptertitle"> An In-depth Walkthrough of Supercharging Apps with Blackfire</h1>    <h3 class="author">Reza Lavaryan</h3><p>No one hates robust and scalable applications, especially when the database is growing quickly, and millions of requests need to be served on a daily basis. Profiling is a form of program analysis to measure the time and resources consumed by the program. With profiling, we can spot the performance bottlenecks in the code and do something about them. There is a variety of profiling tools out there, each taking a different approach.</p>
+<p><img src="../images/1452685677article_thumb-1024x549.jpg" alt="Supercharged development"></p>
+<p>There are two main types of profiling methods: <strong>Sampling</strong> and <strong>Instrumentation</strong>.</p>
+<p>In the sampling approach, the profiler takes samples of the <strong>call stack</strong> or the <strong>Memory</strong> at certain intervals, and updates its statistics. This method has a lesser effect on performance because it doesn’t modify the code at all. However, sampling has its overhead, which can be tuned by increasing the sampling frequency.</p>
+<p>In the instrumentation approach, profiling instructions are inserted into the code either by the programmer or automatically by the profiler (at bytecode level). This approach has a significant performance impact on the application but provides precise details of what exactly is happening in the code at runtime.</p>
+<p><a href="https://blackfire.io/">Blackfire.io</a> is the new generation of web profilers, which takes the automatic instrumentation approach, but without imposing a performance impact on our application. It’s been developed by <a href="https://sensiolabs.com/">Sensio Labs</a>, the team behind the <a href="http://sitepoint.com/tag/symfony">Symfony Framework</a>.</p>
+<p>What makes Blackfire special is that it helps us <strong>continuously</strong> test our application’s performance without adding a single line of code.</p>
+<p>We can profile any PHP script using its fancy Google Chrome extension, or its command line tool.</p>
+<p>Blackfire is easy to install as it is supported by many cloud server providers and VM boxes, including Homestead. In this tutorial, we’re going to learn how we can use Blackfire to build faster applications. As usual, we’ll use <a href="http://www.sitepoint.com/quick-tip-get-homestead-vagrant-vm-running/">Homestead Improved</a> to set up our development environment.</p>
+<h2 id="getting-started">Getting Started</h2>
+<p>Once the VM is booted up and we’ve managed to ssh into the system using <code>vagrant ssh</code>, we can actually start using Blackfire!</p>
+<p>But wait, first we need to create a Blackfire account <a href="https://blackfire.io/signup">here</a>. If we already have one, we can proceed by putting our Blackfire credentials inside <code>homestead.yaml</code> file, which is located in the root directory of our Vagrant box.</p>
+<p>To get our Blackfire credentials, we log in to <a href="http://blackfire.io">Blackfire</a>, click on the profile photo at top right side of the page, and click on <a href="https://blackfire.io/account/credentials">My Credentials</a>.</p>
+<p>The credentials are divided into two categories: <code>Client Credentials</code> and <code>Server Credentials</code>.</p>
+<p><img src="../images/1452685666figure_01-1024x328.png" alt="My Credentials"></p>
+<p>We need to uncomment the Blackfire settings in our <code>Homestead.yaml</code> file and put the credentials into place:</p>
+<p><strong>homestead.yml</strong></p>
+<pre><code>blackfire:
+    - id: &quot;Server Id here&quot;
+        token: &quot;Server token here&quot;
+        client-id: &quot;Client Id here&quot;
+        client-token: &quot;Client token here&quot;
+</code></pre><h2 id="building-blocks-of-blackfire">Building Blocks of Blackfire</h2>
+<p>Blackfire is made of five main components:</p>
+<ul>
+<li><strong>The Probe</strong> is a PHP extension, which instruments the application and collects the performance related information (currently works on <strong>Linux</strong> and <strong>macOS</strong>)</li>
+<li><strong>The Agent</strong> is a server-side daemon that aggregates and forwards the profile information to <a href="http://blackfire.io">Blackfire</a>.</li>
+<li><strong>The Companion</strong> is Google Chrome extension used to run the profiler from the browser; it can be installed from <a href="https://blackfire.io/docs/integrations/chrome">this URL</a>.</li>
+<li><strong>The Client</strong> is the command line equivalent of the Companion, which we use to profile APIs, web services, web pages, etc.</li>
+<li><strong>The Web-based Interface</strong> compares and visualizes the profile information in graph diagrams and tabular formats.</li>
+</ul>
+<blockquote>
+<p>The Probe, the Agent, the Client are pre-installed if we’re using the Homestead Improved Vagrant box.</p>
+</blockquote>
+<h2 id="some-terms-to-know-before-we-start">Some Terms to Know before We Start</h2>
+<ul>
+<li><p><strong>Reference Profile:</strong> We usually need to run our first profile as a <strong>reference profile</strong>. This profile will be the performance <strong>baseline</strong> of our application. We can compare any profile with the reference, to measure the performance achievements.</p>
+</li>
+<li><p><strong>Exclusive Time:</strong> The amount of time spent on a function/method to be executed, without considering the time spent for its external calls.</p>
+</li>
+<li><p><strong>Inclusive Time:</strong> The total time spent to execute a function including all the external calls.</p>
+</li>
+<li><p><strong>Hot Paths:</strong> Hot Paths are the parts of our application that were most active during the profile. These could be the parts that consumed more memory or took more CPU time.</p>
+</li>
+</ul>
+<h2 id="profiling-a-script">Profiling a Script</h2>
+<p>In this section, let’s profile a simple PHP script to see how fast or slow it is. To have realistic profile results, we’re going to write a small PHP script which contains database interactions and function calls. The script inserts 1,000 rows of random user data to a database table.</p>
+<h3 id="generating-dummy-data">Generating Dummy Data</h3>
+<p>To generate the dummy data, we use <a href="https://github.com/fzaninotto/Faker">Faker</a>, a handy library to generate random data about almost anything. Inside the VM and inside the project folder, we install it by executing:</p>
+<pre><code class="lang-bash">composer require fzanintto/faker
+</code></pre>
+<p>Next, we create a data provider script which populates a JSON file with dummy data. We’ll use this JSON file within our main PHP script.</p>
+<p>Why aren&#39;t we doing this in our main script? If we use <code>Faker</code> within our main script, the profile result will also include all the operations of <code>Faker</code> library. This will make our profile analysis more complicated, while we need something more bare-bones for this tutorial.</p>
+<p>We name the file <code>UserProviderJSON.php</code>:</p>
+<pre><code class="lang-php">&lt;?php
+
+require_once(&#39;vendor/autoload.php&#39;);
+
+$num = isset($_GET[&#39;num&#39;]) ? $_GET[&#39;num&#39;] : 1000;
+$data = [];
+
+$faker = Faker\Factory::create();
+
+if(!file_exists(&#39;data&#39;)) {
+    mkdir(&#39;data&#39;);
+}
+
+for ($i = 0; $i &lt; $num; $i++) {
+    $data[] = [&#39;name&#39; =&gt; $faker-&gt;name, &#39;email&#39; =&gt; $faker-&gt;email, ⤶
+        &#39;city&#39; =&gt; $faker-&gt;city,];
+}
+
+file_put_contents(&#39;data/users.json&#39;, json_encode($data));
+
+echo &#39;JSON file generated.&#39;;
+</code></pre>
+<p>The data provider script consists of a function which generates an array of dummy data, converts the array to JSON format, and saves it as a file.</p>
+<p>We can then run the data provider script with <code>php UserProviderJSON.php</code>.</p>
+<p>As a result, a file named <code>users.json</code> will be created within <code>data</code> directory of our project’s root directory. This file should contain 1,000 entries of random user information in JSON format.</p>
+<h3 id="setting-up-the-mysql-database">Setting up the MySQL Database</h3>
+<p>If everything has gone well so far, we can create the MySQL database to store the data.</p>
+<p>Then, we run MySQL’s command-line client:</p>
+<pre><code class="lang-bash">mysql -h localhost -u homestead -psecret
+</code></pre>
+<p>Now, we create a database called <code>blackfire_tutorial</code>:</p>
+<pre><code class="lang-mysql">CREATE DATABASE blackfire_tutorial;
+USE blackfire_tutorial;
+</code></pre>
+<p>And the table:</p>
+<pre><code class="lang-mysql">CREATE TABLE IF NOT EXISTS `sample_users` (
+    `id` int(11) NOT NULL,
+    `name` varchar(255) DEFAULT NULL,
+    `email` varchar(255) DEFAULT NULL,
+    `city` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+</code></pre>
+<h3 id="writing-the-main-script">Writing the Main Script</h3>
+<p>Let’s name it <code>benchmark-before.php</code>:</p>
+<pre><code class="lang-php">&lt;?php
+
+$db = new PDO(&#39;mysql:host=localhost;dbname=blackfire_tutorial;charset=utf8&#39;, ⤶
+    &#39;homestead&#39;, &#39;secret&#39;);
+
+function SaveCustomers ($db) {
+
+    // Providing data
+    $users = userProvider();
+
+    for ($i = 0; $i &lt; count($users); $i++) {
+
+        foreach($users[$i] as $key =&gt; $value) {
+            $$key = addslashes($value);
+        }
+
+        $db-&gt;exec(&quot;INSERT INTO sample_users (name, email, city) VALUES ⤶
+            (&#39;$name&#39;, &#39;$email&#39;, &#39;$city&#39;)&quot;);
+
+    }
+}
+
+function userProvider () {
+
+    return json_decode(file_get_contents(&#39;data/users.json&#39;), true);
+
+}
+
+// Storing data
+saveCustomers($db);
+echo &#39;Users imported successfully.&#39;;
+</code></pre>
+<p>In the preceding code, we create a function named <code>saveCustomers()</code>, which accepts a PDO object as the argument. <code>saveCustomers()</code> calls <code>userProvider()</code> to load the contents of <code>data/users.json</code> into an array.</p>
+<p>Consequently, it iterates over the array’s elements and inserts them into the database one by one.</p>
+<p>To run the script, we access it via the <code>/benchmark-before.php</code> relative URL. If everything is in order, the MySQL table will be filled with one thousand rows of random user information.</p>
+<p>To check if the operation was successful:</p>
+<pre><code class="lang-sql">mysql -h localhost -u homestead -psecret
+use blackfire_tutorial;
+select count(id) as rows from sample_users;
+</code></pre>
+<p>The expected output should be as follows:</p>
+<pre><code class="lang-bash">    +-------+
+    | rows  |
+    +-------+
+    | 1000  |
+    +-------+
+    1 row in set (0.01 sec)
+</code></pre>
+<h3 id="running-the-first-profile">Running the First Profile</h3>
+<p>We will profile the script at its current state and set it as the <strong>reference profile</strong>, then we’ll do some micro-optimizations and run the profile again.</p>
+<p>To profile the page, on the <code>benchmark-before.php</code> page, we click on the Blackfire icon in the browser toolbar. Then in <code>Compare With</code> select box, we select <code>Create New Reference</code> and click on <code>Profile</code>.</p>
+<p><img src="../images/1452685658figure_02-1024x256.png" alt="Running the first profile"></p>
+<p><em>Note: To use Companion Chrome Extension, first, we need to make sure we’re logged into <a href="http://blackfire.io">Blackfire.io</a>.</em></p>
+<p>If everything is properly set up, we should see the Blackfire toolbar at the top of the page.</p>
+<p>To see the profile details, we click on <code>View profile</code>, on the right side of the Blackfire toolbar.</p>
+<h3 id="analyzing-the-profile-information">Analyzing the Profile Information</h3>
+<p>After clicking on <code>View profile</code>, we’ll be redirected to the web interface, where we can find all the details about this profile run:</p>
+<p><img src="../images/1452685650figure_03-1024x508.png" alt="Web interface"></p>
+<p>The web interface consists of several parts:</p>
+<h4 id="toolbar">Toolbar</h4>
+<p>The toolbar contains a summary of the profile information including wall time, I/O time, memory usage, CPU time, etc. For our first profile, the toolbar contains the following information:</p>
+<p><img src="../images/1452685642figure_04-1024x37.png" alt="blackfire_toolbar"></p>
+<pre><code>    | Wall Time | I/O    | CPU Time | SQL Queries      |
+    |-----------|--------|----------|------------------|
+    | 578 ms    | 541 ms | 36.8 ms  | 556 s / 1000 rq  |
+</code></pre><h4 id="call-graph-diagram">Call Graph Diagram</h4>
+<p>This section visualizes the execution flow of our code in a graph. Each node in the graph represents a function/method in our application with the amount of time it took to execute.</p>
+<p><img src="../images/1452685636figure_05.png" alt="Call graph diagram"></p>
+<p>All <strong>nodes</strong> in the graph are color-coded. The rule is simple: <strong>The darker this red color is, the more active this node is during each request.</strong></p>
+<p>Colored borders show the application’s <strong>hot paths</strong> (the parts of our application that were most active during the profile) while the colored backgrounds show the most <strong>intense</strong> nodes. In many cases, hot paths don’t imply a performance bottleneck as some routines normally do the heavy lifting in our application. However, it is a good place to start when trying to locate the bottlenecks.</p>
+<p>By having a quick glance at the graph, we can spot the most active nodes. In our case, <code>saveCustomers()</code> has used <strong>99.27%</strong> (including external calls) of the total time.</p>
+<p><strong>PDO::exec</strong> (called by <code>saveCustomers()</code>) is the most intense node in the graph, as we’ve called this method one thousand times from <code>saveCustomers()</code>. It has taken <strong>92.56%</strong> of the total time spent, according to the graph!</p>
+<h4 id="functions-list">Functions List</h4>
+<p><img src="../images/1452685630figure_06.png" alt="Functions list"></p>
+<p>By clicking on each node, we can see all the details about it (on the left panel) including the number of calls and spent time.</p>
+<p>As an example, we click on the <code>saveCustomers()</code> node. According to the screenshot above, we can see that this function has been called <strong>once</strong> (1 caller), and it has four <strong>callees</strong> (external function/method calls).</p>
+<p>There are also several horizontal bar charts, showing the inclusive/exclusive times for this node in each <strong>dimension</strong> (wall time, I/O time, Memory, CPU time, etc.). The darker shade shows the exclusive time while the lighter shade shows the inclusive time. If we move the mouse over the bars, we can see the time/percentage for each of these dimensions.</p>
+<p>We can also see the <strong>caller(s)</strong> of this function by clicking on the button underneath the <strong>1 Callers (1 calls)</strong> label.</p>
+<p>If we scroll a bit down, we can also see the <strong>callee(s)</strong>. Above the <strong>4 callees</strong> label, there are several buttons next to each other with <strong>different</strong> widths. By clicking on each of these buttons, we’ll see the performance information for each external call from <code>saveCustomer()</code>. For instance, <code>userProvider()</code> is one of the callees of <code>saveCustomers()</code> .</p>
+<p><img src="../images/1452685624figure_07.png" alt="Callees"></p>
+<h4 id="blackfire-metrics">Blackfire Metrics</h4>
+<p>Blackfire provides some metrics out of the box allowing us to evaluate our application’s performance from other perspectives as well, like SQL queries, PDO connections, HTTP response size, the number of compiled and executed files, just to name a few.</p>
+<p><img src="../images/1452685618figure_09.png" alt="Metrics"></p>
+<p>These metrics can be used in continuous performance testing. We’ll get to that shortly.</p>
+<h3 id="optimizing-the-existing-code">Optimizing the Existing Code</h3>
+<p>Okay, now let’s do some micro-optimizations on the existing script to improve the performance a bit. In the existing code, we’re making one database request per entry, meaning 1,000 database interactions during each request. What if we could reduce this number to only <strong>one</strong> request? Consider the following statement:</p>
+<pre><code class="lang-mysql">INSERT INTO persons (name, email, city) VALUES (?, ?, ?),(?, ?, ?),(?, ?, ?),(?, ?, ?)⤶
+...(?, ?, ?)
+</code></pre>
+<p>In the above statement, all the values are concatenated as groups of parentheses (separated by commas). This statement will obviously use more memory, but will be much faster than the existing one. Let’s see it in action:</p>
+<pre><code class="lang-php">&lt;?php
+
+$db = new PDO(&#39;mysql:host=localhost;dbname=blackfire_tutorial;charset=utf8&#39;, ⤶
+&#39;homestead&#39;, &#39;secret&#39;);
+
+function SaveCustomers($db) {
+
+    // Providing data
+    $users = userProvider();
+
+    $params = [];
+    $num = count($users);
+    $placeholders = rtrim(str_repeat(&#39;(?, ?, ?), &#39;, $num), &#39;, &#39;);
+
+    for ($i = 0; $i &lt; $num; $i++) {
+
+        $params[] = $users[$i][&#39;name&#39;];
+        $params[] = $users[$i][&#39;email&#39;];
+        $params[] = $users[$i][&#39;city&#39;];
+
+    }
+
+    $q = $db-&gt;prepare(&#39;INSERT INTO sample_users (name, email, city) VALUES &#39; ⤶
+    . $placeholders);
+    $q-&gt;execute($params);
+
+    unset($params);
+    unset($placeholders);
+}
+
+function userProvider () {
+
+    return json_decode(file_get_contents(&#39;data/users.json&#39;), true);
+
+}
+
+//Saving data
+saveCustomers($db);
+echo &#39;Users imported successfully.&#39;;
+</code></pre>
+<p>We call this file <code>benchmark-after.php</code> and run it in the browser. Now, we run the profiler again. This time in the <strong>Compare with</strong> select box, we choose our reference profile.</p>
+<p><img src="../images/1452685612figure_10.png" alt="Choosing profile"></p>
+<p>When the profiling is done, we click on <code>View Comparisons</code> to go to the web interface.</p>
+<p><img src="../images/1452685605figure_11-1024x36.png" alt="Second profile toolbar"></p>
+<p>As we can see, the web interface is a bit different now since we’re comparing two different profiles. By taking a quick look at the toolbar, we can see that the wall time has been significantly optimized by <strong>98%</strong> (from <strong>578 ms</strong> to <strong>14 ms</strong>) and the number of database requests is reduced to only one! The memory usage has been increased by <strong>97%</strong> though (2.42 MB).</p>
+<p>If the performance has been increased when compared to the reference profile, respective values on the toolbar should be colored in green. Red means the performance has been reduced (in our case the Memory usage):</p>
+<pre><code>    | Wall Time | I/O    | CPU Time | Memory | SQL Queries      |
+    |-----------|--------|----------|--------|------------------|
+    |   -98%    |  -98%  |   -89%   |  +117% |  -99% / -999 rq  |
+</code></pre><p>The toolbar’s information in the second profile run displays percentage differences (between the current profile and the reference). To see the information of the current profile, toggle the <code>Delta</code> switch in right side of the toolbar:</p>
+<p><img src="../images/1452685598figure_12.png" alt="Delta switch"></p>
+<p>By looking at the graph, we can also see that the performance has improved. The nodes in this diagram are colored blue. The negative value in each node means the amount of time we have saved.</p>
+<p><img src="../images/1452685593figure_13.png" alt="Blue graph diagram"></p>
+<p>In our case <strong>PDO::exec</strong> has been impacted most (time reduced by 555 ms). By clicking the node, we can see its details in the left pane. The performance information of this profile and the reference profile are displayed <strong>side by side</strong>.</p>
+<p>By clicking on the metric tab, we can see the improvements from other perspectives. For example, in our last profile run, the <code>PDO Queries</code> has been reduced to only one.</p>
+<p><img src="../images/1452685588figure_14.png" alt="Query metrics"></p>
+<p>Well, this wasn’t a lesson in performance tuning, but good enough to scratch the surface of Blackfire.</p>
+<h2 id="using-the-command-line-interface">Using the Command Line Interface</h2>
+<p>Along with the Companion, Blackfire provides a nifty command line utility called <code>blackfire</code> allowing us to profile any PHP script including web pages, web services, API calls or command-line scripts right from the terminal.</p>
+<h3 id="profiling-http-requests">Profiling HTTP Requests</h3>
+<p>To profile a web page from the command line, we use the <code>curl</code> sub-command followed by the page URL:</p>
+<pre><code class="lang-bash">blackfire curl http://192.168.10.10/benchmark-before.php
+</code></pre>
+<p>As a result, Blackfire outputs some performance related information along with the URL to the web interface:</p>
+<pre><code>Profile URL: https://blackfire.io/profiles/b8fceed1-06be-4a0f-b28f-7841457e0837/graph
+    Total time:   628 ms
+    CPU time:    74 ms
+            I/O:   554 ms
+        Memory:  1.23 MB
+        Network:      n/a
+            SQL:   570 ms  1000 rq
+</code></pre><p>To have more precise results, we can take several <strong>samples</strong> of the same request by passing the <code>--sample</code> option, followed by the number of samples that we want. Blackfire takes 10 samples by default so don’t be surprised if your database table contains 11,000 rows after the first profile run.</p>
+<pre><code class="lang-bash">blackfire --sample 15 curl http://192.168.10.10/benchmark-before.php
+</code></pre>
+<p>We can also create a new reference profile just the way we did using Companion:</p>
+<pre><code class="lang-bash">blackfire --new-reference curl http://192.168.10.10/benchmark-before.php
+</code></pre>
+<p>Or compare it against a previously created reference profile. To do this, we pass <code>--reference</code> followed by the reference profile id:</p>
+<pre><code class="lang-bash">blackfire --reference=7  curl http://192.168.10.10/benchmark-after.php
+</code></pre>
+<p><em>The reference profile id is available in the web interface, or as part of the profile output when using <code>--new-reference</code> option.</em></p>
+<h3 id="profiling-cli-scripts">Profiling CLI Scripts</h3>
+<p>By using the <code>blackfire</code> utility, we can profile any command-line script as well. This is possible via the <code>run</code> sub-command:</p>
+<pre><code class="lang-bash">blackfire run php benchmark-before.php
+</code></pre>
+<p>All the options used with the <code>curl</code> sub-command can also be used with <code>run</code>.</p>
+<h2 id="performance-tests">Performance Tests</h2>
+<p>Another great feature of Blackfire is its continuous performance testing. As mentioned earlier, Blackfire provides a variety of metrics out of the box which we can use to write performance tests. This feature is only available to premium users, but it is also available as a two-week trial. Assertions can be on time dimensions or other dimensions like the number of database requests, memory usage or response size.</p>
+<p>All the tests should be in <code>.blackfire.yml</code> within our project’s root directory.</p>
+<p>A Blackfire test is like the following code:</p>
+<pre><code class="lang-yml">tests:
+    &quot;Pages should be fast enough&quot;:
+        path: &quot;/benchmark-before.php&quot; # run the assertions for all HTTP requests
+        assertions:
+            - &quot;main.wall_time &lt; 100ms&quot; # wall clock time is less than 100ms
+</code></pre>
+<p>As we can see, all the tests should be under the <code>tests</code> main key.</p>
+<p>A test is composed of the following components:</p>
+<ul>
+<li>A name (in the above example: <strong>Pages should be fast enough</strong>)</li>
+<li>A regular expression (path) that all HTTP request must <strong>match</strong>, for the test to be executed.</li>
+<li>A set of <strong>assertions</strong> which consist of <strong>metrics</strong> and <strong>assertion values</strong>.</li>
+</ul>
+<p>Each time the profiler is run for a project containing the <code>.blackfire.yml</code> file, Blackfire automatically runs all the tests and reflects the result in the web interface (<strong>Assertion</strong> tab in the left panel).</p>
+<p><img src="../images/1452685582figure_15.png" alt="Assertion test"></p>
+<p>In the above example, the test is run for <code>benchmark-before.php</code>. <code>main.wall_time</code> is a Blackfire metric for the total time required to execute the script. In the above assertion, we check if it’s less than <code>100ms</code>:</p>
+<p>Here’s another example with more assertions from <a href="https://blackfire.io/docs/cookbooks/tests">Blackfire’s documentation</a>:</p>
+<pre><code class="lang-yml">tests:
+    &quot;Homepage should not hit the DB&quot;:
+        path: &quot;/&quot;     # only apply the assertions for the homepage
+        assertions:
+            - &quot;metrics.sql.queries.count == 0&quot;      # no SQL statements executed
+            - &quot;main.peak_memory &lt; 10mb&quot;             # memory does not exceed 10mb
+            - &quot;metrics.output.network_out &lt; 100kb&quot;  # response size is less than 100kb
+</code></pre>
+<p>The above test is run for the home page (<code>/</code>). In the assertions, we make sure that no database request is made on the home page, memory usage does not exceed <code>10 MB</code> and the response size is less than <code>100 KB</code>.</p>
+<p>To learn more about assertions, refer to the <a href="https://blackfire.io/docs/reference-guide/assertions">Assertion reference</a>.</p>
+<p>We can also have <strong>custom metrics</strong> in our assertions, which is fully covered in the <a href="https://blackfire.io/docs/reference-guide/metrics#metrics-custom-metrics">documentation</a>.</p>
+<p><em>Note: to validate the tests, we can use Blackfire’s <a href="https://blackfire.io/docs/validator">Validator</a>.</em></p>
+<h2 id="wrapping-up">Wrapping Up</h2>
+<p><a href="http://blackfire.io">Blackfire.io</a> is a powerful web profiler which instruments applications without adding a single line of code. It consists of five main components: the Probe, The Agent, The Companion, CLI tool and the web interface. The Probe and the Agent are responsible for instrumenting the code and forwarding the profile results to the Blackfire server.</p>
+<p>We can profile an application either by using Companion or <code>blackfire</code> command line utility.</p>
+<p>Blackfire provides a web interface which visualizes the details of the profile result. We can set a profile as a reference, and then use that as a performance baseline to compare against future profiles.</p>
+</div>

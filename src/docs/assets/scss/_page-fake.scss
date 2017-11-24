@@ -1,0 +1,11 @@
+// this screen media query is TEMPORARY to mimic the PDF in the live browser. It shouldn't remain long term.
+@media screen {
+    body{
+        width: 7in;
+        outline: 1px orange dashed;
+        padding: .5in;
+    }
+
+}
+
+

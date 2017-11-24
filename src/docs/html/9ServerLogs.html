@@ -1,0 +1,189 @@
+<div class="chapter"><div class="ch-head">Chapter</div>    <h1 class="chaptertitle"> How to Process Server Logs</h1>    <h3 class="author">Daniel Berman</h3><p>When things go south with our applications -- as they sometimes do, whether we like it or not -- our log files are normally among the first places where we go when we start the troubleshooting process. The big “but” here is that despite the fact that log files contain a wealth of helpful information about events, they are usually extremely difficult to decipher.</p>
+<p>A modern web application environment consists of multiple log sources, which collectively output thousands of log lines written in unintelligible machine language. If you, for example, have a LAMP stack set up, then you have PHP, Apache, and MySQL logs to go through. Add system and environment logs into the fray -- together with framework-specific logs such as Laravel logs -- and you end up with an endless pile of machine data.</p>
+<p>Talk about a needle in a haystack.</p>
+<p><img src="../images/1462437187elk-logo.png" alt="ELK logo"></p>
+<p>The ELK Stack (<a href="https://github.com/elastic/elasticsearch">Elasticsearch</a>, <a href="https://github.com/elastic/logstash">Logstash</a>, and <a href="https://github.com/elastic/kibana">Kibana</a>) is quickly becoming the most popular way to handle this challenge. Already the most popular open-source log analysis platform -- with 500,000 downloads a month, according to Elastic -- ELK is a great way to centralize logs from multiple sources, identify correlations, and perform deep-data analysis.</p>
+<p>Elasticsearch is a search-and-analytics engine based on Apache Lucene that allows users to search and analyze large amounts of data in almost real time. Logstash can ingest and forward logs from anywhere to anywhere. Kibana is the stack’s pretty face -- a user interface that allows you to query, visualize, and explore Elasticsearch data easily.</p>
+<p>This article will describe how to set up the ELK Stack on a local development environment, ship web server logs (Apache logs in this case) into Elasticsearch using Logstash, and then analyze the data in Kibana.</p>
+<h2 id="installing-java">Installing Java</h2>
+<p>The ELK Stack requires Java 7 and higher (only Oracle’s Java and the OpenJDK are supported), so as an initial step, update your system and run the following:</p>
+<pre><code class="lang-bash">sudo apt-get install default-jre
+</code></pre>
+<h2 id="installing-elk">Installing ELK</h2>
+<p>There are numerous ways of installing the ELK Stack -- you can use Docker, Ansible, Vagrant, Microsoft Azure, AWS, or a hosted ELK solution -- just take your pick. There is a vast number of tutorials and guides that will help you along the way, one being this <a href="http://logz.io/learn/complete-guide-elk-stack/">ELK Stack guide</a> that we at <a href="http://logz.io">Logz.io</a> put together.</p>
+<h3 id="installing-elasticsearch">Installing Elasticsearch</h3>
+<p>We’re going to start the installation process with installing Elasticsearch. There are various ways of setting up Elasticsearch but we will use Apt.</p>
+<p>First, download and install Elastic’s public signing key:</p>
+<pre><code class="lang-bash">wget -qO - https://packages.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+</code></pre>
+<p>Next, save the repository definition to <code>/etc/apt/sources.list.d/elasticsearch-2.x.list</code>:</p>
+<pre><code class="lang-bash">echo &quot;deb http://packages.elastic.co/elasticsearch/2.x/debian stable main&quot; | sudo tee -a /etc/apt/sources.list.d/elasticsearch-2.x.list
+</code></pre>
+<p>Last but not least, update the repository cache and install Elasticsearch:</p>
+<pre><code class="lang-bash">sudo apt-get update &amp;&amp; sudo apt-get install elasticsearch
+</code></pre>
+<p>Elasticsearch is now installed. Before we continue to the next components, we’re going to tweak the configuration file a bit:</p>
+<pre><code class="lang-bash">sudo nano /etc/elasticsearch/elasticsearch.yml
+</code></pre>
+<p>Some common configurations involve the restriction of external access to Elasticsearch, so data cannot be hacked or deleted via HTTP API:</p>
+<pre><code class="lang-yaml">network.host: localhost
+</code></pre>
+<p>You can now restart Elasticsearch:</p>
+<pre><code class="lang-bash">sudo service elasticsearch restart
+</code></pre>
+<p>To verify that Elasticsearch is running properly, query the following URL using the cURL command:</p>
+<pre><code class="lang-bash">sudo curl &#39;http://localhost:9200&#39;
+</code></pre>
+<p>You should see the following output in your terminal:</p>
+<pre><code class="lang-javascript">{
+    &quot;name&quot; : &quot;Jebediah Guthrie&quot;,
+    &quot;cluster_name&quot; : &quot;elasticsearch&quot;,
+    &quot;version&quot; : {
+    &quot;number&quot; : &quot;2.3.1&quot;,
+    &quot;build_hash&quot; : &quot;bd980929010aef404e7cb0843e61d0665269fc39&quot;,
+    &quot;build_timestamp&quot; : &quot;2016-04-04T12:25:05Z&quot;,
+    &quot;build_snapshot&quot; : false,
+    &quot;lucene_version&quot; : &quot;5.5.0&quot;
+    },
+    &quot;tagline&quot; : &quot;You Know, for Search&quot;
+}
+</code></pre>
+<p>To make the service start on boot, run:</p>
+<pre><code class="lang-bash">sudo update-rc.d elasticsearch defaults 95 10
+</code></pre>
+<h3 id="installing-logstash">Installing Logstash</h3>
+<p>Logstash, the &quot;L&quot; in the &quot;ELK Stack&quot;, is used at the beginning of the log pipeline, ingesting and collecting data before sending it on to Elasticsearch.</p>
+<p>To install Logstash, add the repository definition to your <code>/etc/apt/sources.list</code> file:</p>
+<pre><code class="lang-bash">echo &quot;deb http://packages.elastic.co/logstash/2.2/debian stable main&quot; | sudo tee -a /etc/apt/sources.list
+</code></pre>
+<p>Update your system so that the repository will be ready for use and then install Logstash:</p>
+<pre><code class="lang-bash">sudo apt-get update &amp;&amp; sudo apt-get install logstash
+</code></pre>
+<p>We’ll be returning to Logstash later to configure log shipping into Elasticsearch.</p>
+<h3 id="installing-kibana">Installing Kibana</h3>
+<p>The final piece of the puzzle is Kibana - the ELK Stack&#39;s pretty face. First, create the Kibana source list:</p>
+<pre><code class="lang-bash">echo &quot;deb http://packages.elastic.co/kibana/4.5/debian stable main&quot; | sudo tee -a /etc/apt/sources.list
+</code></pre>
+<p>Then, update and install Kibana:</p>
+<pre><code class="lang-bash">sudo apt-get update &amp;&amp; apt-get install kibana
+</code></pre>
+<p>Configure the Kibana configuration file at <code>/opt/kibana/config/kibana.yml</code>:</p>
+<pre><code class="lang-bash">sudo vi /opt/kibana/config/kibana.yml
+</code></pre>
+<p>Uncomment the following lines:</p>
+<pre><code class="lang-yaml">server.port: 5601
+server.host: “0.0.0.0”
+</code></pre>
+<p>Last but not least, start Kibana:</p>
+<pre><code class="lang-bash">sudo service kibana start
+</code></pre>
+<p>You can access Kibana in your browser at <code>http://localhost:5601/</code> (change the URL if you&#39;re using a VM like <a href="http://www.sitepoint.com/quick-tip-get-homestead-vagrant-vm-running/">Homestead Improved</a> to whichever host/port you configured):</p>
+<p><img src="../images/1461657638kibana_loaded.png" alt="Kibana interface"></p>
+<p>To start analyzing logs in Kibana, at least one index pattern needs to be defined. An index is how Elasticsearch organizes data, and it can be compared to a database in the world of RDBMS, with mapping defining multiple types.</p>
+<p>You will notice that since we have not yet shipped any logs, Kibana is unable to fetch mapping (as indicated by the grey button at the bottom of the page). We will take care of this in the next few steps.</p>
+<p><strong>Tip:</strong> By default, Kibana connects to the Elasticsearch instance running on localhost, but you can connect to a different Elasticsearch instance. Simply modify the Elasticsearch URL in the Kibana configuration file that you had edited earlier and then restart Kibana.</p>
+<h2 id="shipping-logs">Shipping Logs</h2>
+<p>Our next step is to set up a log pipeline into Elasticsearch for indexing and analysis using Kibana. There are various ways of forwarding data into Elasticsearch, but we’re going to use Logstash.</p>
+<p>Logstash configuration files are written in JSON format and reside in <code>/etc/logstash/conf.d</code>. The configuration consists of three plugin sections: input, filter, and output.</p>
+<p>Create a configuration file called <code>apache-logs.conf</code>:</p>
+<pre><code class="lang-bash">sudo vi /etc/logstash/conf.d/apache-logs.conf
+</code></pre>
+<p>Our first task is to configure the input section, which defines where data is being pulled from.</p>
+<p>In this case, we’re going to define the path to our Apache access log, but you could enter a path to any other set of log files (e.g. the path to your PHP error logs).</p>
+<p><em>Before doing so, however, I recommend doing some research into supported input plugins and how to define them. In some cases, other log forwarders such as <a href="https://www.elastic.co/products/beats/filebeat">Filebeat</a> and <a href="http://www.fluentd.org/">Fluentd</a> are recommended.</em></p>
+<p>The input configuration:</p>
+<pre><code class="lang-conf">input {
+    file {
+        path =&gt; &quot;/var/log/apache2/access.log&quot;
+        type =&gt; &quot;apache-access&quot;
+    }
+}
+</code></pre>
+<p>Our next task is to configure a filter.</p>
+<p>Filter plugins allow us to take our raw data and try to make sense of it. One of these plugins is grok -- a plugin used to derive structure out of unstructured data. Using grok, you can define a search and extract part of your log lines into structured fields.</p>
+<pre><code class="lang-conf">filter {
+    if [type] == &quot;apache-access&quot; {
+    grok {
+        match =&gt; { &quot;message&quot; =&gt; &quot;%{COMBINEDAPACHELOG}&quot; }
+    }
+    }
+}
+</code></pre>
+<p>The last section of the Logstash configuration file is the Output section, which defines the location to where the logs are sent. In our case, it is our local Elasticsearch instance on our localhost:</p>
+<pre><code class="lang-javascript">output {
+    elasticsearch {}
+}
+</code></pre>
+<p>That’s it. Once you’re done, start Logstash with the new configuration:</p>
+<pre><code class="lang-bash">/opt/logstash/bin/logstash -f /etc/logstash/conf.d/apache-logs.conf
+</code></pre>
+<p>You should see the following JSON output from Logstash indicating that all is in order:</p>
+<pre><code class="lang-javascript">{
+        &quot;message&quot; =&gt; &quot;127.0.0.1 - - [24/Apr/2016:11:41:59 +0000] \&quot;GET / HTTP/1.1\&quot; 200 11764 \&quot;-\&quot; \&quot;curl/7.35.0\&quot;&quot;,
+        &quot;@version&quot; =&gt; &quot;1&quot;,
+        &quot;@timestamp&quot; =&gt; &quot;2016-04-24T11:43:34.245Z&quot;,
+            &quot;path&quot; =&gt; &quot;/var/log/apache2/access.log&quot;,
+            &quot;host&quot; =&gt; &quot;ip-172-31-46-40&quot;,
+            &quot;type&quot; =&gt; &quot;apache-access&quot;,
+        &quot;clientip&quot; =&gt; &quot;127.0.0.1&quot;,
+            &quot;ident&quot; =&gt; &quot;-&quot;,
+            &quot;auth&quot; =&gt; &quot;-&quot;,
+        &quot;timestamp&quot; =&gt; &quot;24/Apr/2016:11:41:59 +0000&quot;,
+            &quot;verb&quot; =&gt; &quot;GET&quot;,
+        &quot;request&quot; =&gt; &quot;/&quot;,
+    &quot;httpversion&quot; =&gt; &quot;1.1&quot;,
+        &quot;response&quot; =&gt; &quot;200&quot;,
+            &quot;bytes&quot; =&gt; &quot;11764&quot;,
+        &quot;referrer&quot; =&gt; &quot;\&quot;-\&quot;&quot;,
+            &quot;agent&quot; =&gt; &quot;\&quot;curl/7.35.0\&quot;&quot;
+}
+</code></pre>
+<p>Refresh Kibana in your browser, and you’ll notice that the index pattern for our Apache logs was identified:</p>
+<p><img src="../images/1461657663kibana_loaded_with_index_defined.png" alt="Kibana interface"></p>
+<p>Click the <strong>Create</strong> button, and then select the Discover tab:</p>
+<p><img src="../images/1461657631kibana_apache_logs_loaded.png" alt="Kibana interface"></p>
+<p>From this point onwards, Logstash is tailing the Apache access log for messages so that any new entries will be forwarded into Elasticsearch.</p>
+<h2 id="analyzing-logs">Analyzing Logs</h2>
+<p>Now that our pipeline is up and running, it’s time to have some fun.</p>
+<p>To make things a bit more interesting, let’s simulate some noise on our web server. To do this I’m going to download some <a href="http://logz.io/sample-data">sample Apache logs</a> and insert them into the Apache access log. Logstash is already tailing this log, so these messages will be indexed into Elasticsearch and displayed in Kibana:</p>
+<pre><code class="lang-bash">wget http://logz.io/sample-data
+sudo -i
+cat /home/ubuntu/sample-data &gt;&gt; /var/log/apache2/access.log
+exit
+</code></pre>
+<p><img src="../images/1461657653kibana_loaded_sample_data.png" alt="Kibana interface"></p>
+<h3 id="searching">Searching</h3>
+<p>Searching is the bread and butter of the ELK Stack, and it’s an art unto itself. There is a large amount of documentation available online, but I thought I’d cover the essentials so that you will have a solid base from which to start your exploration work.</p>
+<p>Let’s start with some simple searches.</p>
+<p>The most basic search is the “free text” search that is performed against all indexed fields. For example, if you’re analyzing web server logs, you could search for a specific browser type (searching is performed using the wide search box at the top of the page):</p>
+<pre><code>Chrome
+</code></pre><p>It’s important to note that free text searches are NOT case-sensitive unless you use double quotes, in which case the search results show exact matches to your query.</p>
+<pre><code>“Chrome”
+</code></pre><p>Next up are the field-level searches.</p>
+<p>To search for a value in a specific field, you need to add the name of the field as a prefix to the value:</p>
+<pre><code>type:apache-access
+</code></pre><p>Say, for example, that you’re looking for a specific web server response. Enter <code>response:200</code> to limit results to those containing that response.</p>
+<p>You can also search for a range within a field. If you use brackets [], the results will be inclusive. If you use curly braces {}, the results will exclude the specified values in the query.</p>
+<p>Now, it’s time to take it up a notch.</p>
+<p>The next types of searches involve using logical statements. These are quite intuitive but require some finesse because they are extremely syntax-sensitive.</p>
+<p>These statements include the use of the Boolean operators AND, OR, and NOT:</p>
+<pre><code>type:apache-access AND (response:400 OR response:500)
+</code></pre><p>In the above search, I’m looking for Apache access logs with only a 400 or 500 response. Note the use of parentheses as an example of how more complex queries can be constructed.</p>
+<p>There are many more search options available (I recommend referring to Logz.io&#39;s <a href="http://logz.io/blog/kibana-tutorial/">Kibana tutorial</a> for more information) such as regular expressions, fuzzy searches, and proximity searches, but once you’ve pinpointed the required data, you can save the search for future reference and as the basis to create Kibana visualizations.</p>
+<h3 id="visualizing">Visualizing</h3>
+<p>One of the most prominent features in the ELK Stack in general and Kibana in particular is the ability to create beautiful visualizations with the ingested data. These visualizations can then be aggregated into a dashboard that you can use to get a comprehensive view of all the various log files coming into Elasticsearch.</p>
+<p>To create a visualization, select the Visualize tab in Kibana:</p>
+<p><img src="../images/1461657624creating_a_visualization1.png" alt="Create a visualization"></p>
+<p>There are a number of visualization types that you can select, and which type you will choose will greatly depend on the purpose and end-result you are trying to achieve. In this case, I’m going to select the good ol’ pie chart.</p>
+<p>We then have another choice -- we can create the visualization from either a saved search or a new search. In this case, we’re going with the latter.</p>
+<p>Our next step is to configure the various metrics and aggregations for the graph’s X and Y axes. In this case, we’re going to use the entire index as our search base (by not entering a search query in the search box) and then cross reference the data with browser type: Chrome, Firefox, Internet Explorer, and Safari:</p>
+<p><img src="../images/1461657670new_visualization_browser.png" alt="Pie chart visualization"></p>
+<p>Once you are finished, save the visualization. You can then add it to a custom dashboard in the Dashboard tab in Kibana.</p>
+<p>Visualizations are incredibly rich tools to have, and they are the best way to understand the trends within your data.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>The ELK Stack is becoming THE way to analyze and manage logs. The fact that the stack is open source and that it’s backed by a strong community and a fast growing ecosystem is driving its popularity.</p>
+<p>DevOps is not the sole realm of log analysis, and ELK is being used by developers, sysadmins, SEO experts, and marketers as well. Log-driven development -- the development process in which code is monitored using metrics, alerts, and logs -- is gaining traction within more and more R&amp;D teams, and it would not be a stretch of the imagination to tie this to the growing popularity of ELK.</p>
+<p>Of course, no system is perfect and there are pitfalls that users need to avoid, especially when handling big production operations. But this should not deter you from trying it out, especially because there are numerous sources of information that will guide you through the process.</p>
+<p>Good luck, and happy indexing!</p>
+<p><em>This article was <a href="http://www.sitepoint.com/introduction-to-sitepoints-peer-review/">peer reviewed</a> by <a href="http://www.sitepoint.com/author/cthomas/">Christopher Thomas</a>, <a href="http://www.sitepoint.com/author/yrafie/">Younes Rafie</a>, and <a href="http://www.sitepoint.com/author/smolinari/">Scott Molinari</a>. Thanks to all of SitePoint’s peer reviewers for making SitePoint content the best it can be!</em></p>
+</div>

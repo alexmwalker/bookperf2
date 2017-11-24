@@ -1,0 +1,152 @@
+<div class="chapter"><div class="ch-head">Chapter</div>    <h1 class="chaptertitle"> How to Boost Your Server Performance with Varnish</h1>    <h3 class="author">Tonino Jankov</h3><p>Varnish Cache is an <a href="https://en.wikipedia.org/wiki/Web_accelerator">HTTP accelerator</a> and <a href="https://en.wikipedia.org/wiki/Reverse_proxy">reverse proxy</a> developed by Danish consultant and FreeBSD core developer <a href="https://www.wikiwand.com/en/Poul-Henning_Kamp">Poul-Henning Kamp</a>, along with other developers at Norwegian <a href="https://www.redpill-linpro.com/">Linpro AS</a>. It was <a href="https://varnish-cache.org/lists/pipermail/varnish-announce/2006-September/000638.html">released</a> in 2006.</p>
+<p><a href="http://royal.pingdom.com/2012/07/11/how-popular-is-varnish/">According to Pingdom.com</a>, a company focused on web performance, in 2012 Varnish was already famous among the world&#39;s top websites for its capacity to speed up web delivery, and it was being used by sites such as Wired, SlideShare, Zappos, SoundCloud, Weather.com, Business Insider, Answers.com, Urban Dictionary, MacRumors, DynDNS, OpenDNS, Lonely Planet, Technorati, ThinkGeek and Economist.com.</p>
+<p>It is licensed under a two-clause <a href="https://www.wikiwand.com/en/BSD_license">BSD license</a>. Varnish has a premium tier, <a href="https://www.varnish-software.com/pricing/varnish-plus/">Varnish Plus</a>, focused on enterprise customers, which offers some <a href="https://www.varnish-software.com/products/varnish-plus/">extra features, modules, and support</a>.</p>
+<p>Although there are other solutions that also <a href="https://deliciousbrains.com/page-caching-varnish-vs-nginx-fastcgi-cache/">shine</a>, Varnish is still a go-to solution that can dramatically improve website speed, reduce the strain on the web application server&#39;s CPU, and even serve as a <a href="https://www.htpcguides.com/wordpress-ddos-attack-protection-varnish-4-firewall/">protection layer from DDoS</a> attacks. <a href="https://www.keycdn.com/support/using-a-varnish-cdn-stack-with-keycdn/">KeyCDN recommends</a> deploying it on the origin server stack.</p>
+<p>Varnish can sit on a dedicated machine in case of more demanding websites, and make sure that the origin servers aren&#39;t affected by the flood of requests.</p>
+<p>At the time of this writing (November 2017), Varnish is at version <a href="https://varnish-cache.org/docs/5.2/whats-new/changes-5.2.html">5.2</a>.</p>
+<h2 id="how-it-works">How It Works</h2>
+<p><a href="https://en.wikipedia.org/wiki/Cache_(computing">Caching</a>) in general works by keeping the pre-computed outputs of an application in memory, or on the disk, so that expensive computations don&#39;t have to be computed over and over on every request. <a href="https://en.wikipedia.org/wiki/Web_cache">Web Cache</a> can be on the client (browser cache), or on the server. Varnish falls into the second category. It is usually configured so that it listens for requests on the standard HTTP port (80), and then serves the requested resource to the website visitor.</p>
+<p><img src="../images/1511065496varnish-miss-1024x420.gif" alt="Varnish cache miss"></p>
+<p>The first time a certain URL and path are requested, Varnish has to request it from the origin server in order to serve it to the visitor. This is called a CACHE MISS, which can be read in HTTP response headers, depending on the Varnish setup.</p>
+<p>According to the <a href="https://www.varnish-software.com/wiki/faq/index.html">docs</a>:</p>
+<blockquote>
+<p>when an object, any kind of content i.e. an image or a page, is not stored in the cache, then we have what is commonly known as a cache miss, in which case Varnish will go and fetch the content from the web server, store it and deliver a copy to the user and retain it in cache to serve in response to future requests.</p>
+</blockquote>
+<p>When a particular URL or a resource is cached by Varnish and stored in memory, it can be served directly from server RAM; it doesn&#39;t need to be computed every time. Varnish will start delivering a CACHE HIT in a matter of microseconds.</p>
+<p><img src="../images/1511065546varnish-hit-1024x416.gif" alt="Varnish cache hit"></p>
+<p>This means that neither our origin server or our web application, including its database, are touched by future requests. They won&#39;t even be aware of the requests loaded on cached URLs.</p>
+<p>The origin server --- or servers, in case we <a href="http://opentsdb.net/docs/build/html/user_guide/utilities/varnish.html">use Varnish as a load balancer</a> --- are configured to listen on some non-standard port, like 8888, and Varnish is <a href="http://devdocs.magento.com/guides/v2.1/config-guide/varnish/config-varnish-configure.html">made aware of their address and port</a>.</p>
+<h2 id="varnish-features">Varnish Features</h2>
+<p><strong>Varnish is <a href="https://book.varnish-software.com/4.0/chapters/Tuning.html#threading-model">threaded</a>.</strong> It&#39;s been <a href="https://kly.no/posts/2010_01_26__Varnish_best_practices__.html">reported</a> that Varnish was able to handle over 200,000 requests per second on a single instance. If properly configured, the only bottlenecks of your web app will be network throughput and the amount of RAM. (This shouldn&#39;t be an unreasonable requirement, because it just needs to keep computed web pages in memory, so for most websites, a couple of gigabytes should be sufficient.)</p>
+<p><strong>Varnish is extendable via <a href="https://info.varnish-software.com/blog/varnish-modules-vmods-overview">VMODS</a></strong>. These are modules that can use standard C libraries and extend Varnish functionality. There are community-contributed VMODS listed <a href="https://varnish-cache.org/vmods/">here</a>. They range from header manipulation to Lua scripting, throttling of requests, authentication, and so on.</p>
+<p><strong>Varnish has its own domain-specific language, <a href="http://book.varnish-software.com/4.0/chapters/VCL_Basics.html">VCL</a></strong>. VCL provides comprehensive configurability. With a full-page caching server like Varnish, there are a lot of intricacies that need to be solved.</p>
+<p><img src="../images/1511065588vcl-scheme.gif" alt="vcl scheme"></p>
+<p>When we cache a dynamic website with dozens or hundreds of pages and paths, with GET query parameters, we&#39;ll want to exclude some of them from cache, or set different cache-expiration rules. Sometimes we&#39;ll want to cache certain Ajax requests, or exclude them from the cache. This varies from project to project, and can&#39;t be tailored in advance.</p>
+<p>Sometimes we&#39;ll want Varnish to decide what to do with the request depending on request headers. Sometimes we&#39;ll want to pass requests directly to the back end with a certain cookie set.</p>
+<p>To quote the <a href="http://book.varnish-software.com/4.0/chapters/VCL_Basics.html#summary-of-vcl-basics">Varnish book</a>,</p>
+<blockquote>
+<p>VCL provides subroutines that allow you to affect the handling of any single request almost anywhere in the execution chain.</p>
+</blockquote>
+<p>Purging the cache often needs to be done dynamically --- triggered by publishing articles or updating the website. Purging also needs to be done as atomically as possible --- meaning it should target the smallest possible scope, like a single resource or path.</p>
+<p>This means that specific rules need to be defined, with their order of priority in mind. Some examples can be found in the Varnish book (which is available to read <a href="http://book.varnish-software.com/4.0/chapters/VCL_Basics.html">online</a> or as a <a href="https://info.varnish-software.com/the-varnish-book">downloadable PDF</a>).</p>
+<p>Varnish has a set of <a href="http://book.varnish-software.com/4.0/chapters/Appendix_B__Varnish_Programs.html">tools for monitoring and administering the server</a>:</p>
+<ul>
+<li><p>There&#39;s <code>varnishtop</code>, which lets us monitor requested URLs and their frequency.</p>
+</li>
+<li><p><code>varnishncsa</code> can be used to print the <em>Varnish Shared memory Log</em> (VSL): it dumps everything pointing to a certain domain and subdomains.</p>
+</li>
+<li><p><code>varnishhist</code> reads the VSL and presents a live histogram showing the distribution of the last number of requests, giving an overview of server and back-end performance.</p>
+</li>
+<li><p><code>varnishtest</code> is used to test VCL configuration files and develop VMODS.</p>
+</li>
+<li><p><code>varnishstat</code> displays statistics about our varnishd instance:</p>
+<p><img src="../images/1511065626varnishstat-1024x622.gif" alt="varnishstat"></p>
+</li>
+<li><p><code>varnishlog</code> is used to get data about specific clients and requests.</p>
+</li>
+</ul>
+<p><a href="https://www.varnish-software.com/">Varnish Software</a> offers a set of commercial, paid solutions either built on top of Varnish cache, or extending its usage and helping with monitoring and management: <a href="https://www.varnish-software.com/products/varnish-api-engine/">Varnish Api Engine</a>, <a href="https://www.varnish-software.com/products/varnish-extend/">Varnish Extend</a>, <a href="https://www.varnish-software.com/products/akamai-connector-for-varnish/">Akamai Connector for Varnish</a>, <a href="https://www.varnish-software.com/plus/varnish-administration-console/">Varnish Administration Console (VAC)</a>, and <a href="https://www.varnish-software.com/plus/varnish-custom-statistics/">Varnish Custom Statistics (VCS)</a>.</p>
+<h2 id="installing-varnish">Installing Varnish</h2>
+<p>The Varnish docs <a href="https://varnish-cache.org/docs/5.0/installation/install.html">cover installation on various systems</a>. We&#39;ll go with Ubuntu 16.04 LTS in this post.</p>
+<p><a href="https://packagecloud.io/varnishcache/varnish5/install#manual-deb">Packagecloud.io</a> has instructions for updating the Ubuntu repositories and installing Varnish version 5:</p>
+<pre><code class="lang-bash">curl -L https://packagecloud.io/varnishcache/varnish5/gpgkey | sudo apt-key add -
+sudo apt-get update
+sudo apt-get install -y apt-transport-https
+</code></pre>
+<p>Then we add the following lines to the newly created file <code>/etc/apt/sources.list.d/varnishcache_varnish5.list</code>:</p>
+<pre><code class="lang-bash">deb https://packagecloud.io/varnishcache/varnish5/ubuntu/ xenial main
+deb-src https://packagecloud.io/varnishcache/varnish5/ubuntu/ xenial main
+</code></pre>
+<p>Then we run:</p>
+<pre><code class="lang-bash">sudo apt-get update
+sudo apt-get install varnish
+</code></pre>
+<p>We can test a brand-new WordPress installation running on Nginx. First, we change Nginx&#39;s default listening port from 80 to 8080 --- which is the port Varnish expects the back end to be running on --- by adding the following lines to the Nginx virtual host, inside the server clause:</p>
+<pre><code class="lang-cnf">server {       
+    listen 127.0.0.1:8080 default_server;
+    listen [::]:8080 default_server;
+</code></pre>
+<p>Then we configure Varnish: we edit <code>/etc/default/varnish</code>, replacing port 6081 with 80 (the default web port):</p>
+<pre><code class="lang-cnf">DAEMON_OPTS=&quot;-a :80 \
+    -T localhost:6082 \
+    -f /etc/varnish/default.vcl \
+    -S /etc/varnish/secret \
+    -s malloc,256m&quot;
+</code></pre>
+<p>We also need to change <code>/lib/systemd/system/varnish.service</code>, making the same replacement:</p>
+<pre><code class="lang-cnf">[Service]
+Type=simple
+LimitNOFILE=131072
+LimitMEMLOCK=82000
+ExecStart=/usr/sbin/varnishd -j unix,user=vcache -F -a :80 -T localhost:6082 ⤶
+-f /etc/varnish/default.vcl -S /etc/varnish/secret -s malloc,256m
+ExecReload=/usr/share/varnish/reload-vcl
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+</code></pre>
+<p>Then we restart Nginx and Varnish:</p>
+<pre><code class="lang-bash">sudo service nginx restart
+sudo /etc/init.d/varnish restart
+</code></pre>
+<p><em>Warning: due to some peculiarities, Varnish usually must be restarted --- or started this way, not with <code>service varnish start</code> --- in order to read all the config files we edited.</em></p>
+<p>We tested the website speed and responsiveness with <a href="https://locust.io">Locust</a> and <a href="https://tools.pingdom.com">Pingdom Tools</a>.</p>
+<p>Once the cache was warmed up, the difference was impressive, despite Nginx being well known for its speed: <em>the average number of requests per second was multiplied by three to four times</em>, and response time were greatly reduced. Load times were a bit higher due to network latency, since we tested the website hosted in California from a workstation in Europe.</p>
+<p><strong>Locust results for Nginx:</strong></p>
+<p><img src="../images/1511065686locust-nginx.jpg" alt="locust nginx"></p>
+<p><strong>Locust results for Nginx + Varnish:</strong></p>
+<p><img src="../images/1511065729locust-varnish.jpg" alt="Locust varnish"></p>
+<p>Pingdom results were also good.</p>
+<p><strong>Pingdom results for Nginx stack, tested from California:</strong></p>
+<p><img src="../images/1511065769pingdom-nginx.jpg" alt="Pingdom nginx "></p>
+<p><strong>Pingdom results for Nginx + Varnish, California:</strong></p>
+<p><img src="../images/1511065810pingdom-varnish-cal-1024x327.jpg" alt="Pingdom varnish"></p>
+<p>Notice also the <a href="https://en.wikipedia.org/wiki/Time_to_first_byte">TTFB</a> for each case.</p>
+<p><strong>Nginx alone:</strong></p>
+<p><img src="../images/1511065860ttfb-nginx-cal.jpg" alt="TTFB nginx"></p>
+<p><strong>Nginx + Varnish:</strong></p>
+<p><img src="../images/1511065893ttfb-varnish.jpg" alt="TTFB varnish"></p>
+<p>Even if we neglect the pink part, which is the DNS lookup, there is still an obvious difference.</p>
+<h2 id="simplicity-of-setup">Simplicity of Setup</h2>
+<p>Varnish doesn&#39;t care what&#39;s listening on port 8080 (we can change this default port as well, if required). This means that setting up Apache, or some other application server, should be just as straightforward: all we need to do is to configure them to listen on port 8080 instead of 80.</p>
+<h3 id="setting-up-varnish-with-nodejs">Setting up Varnish with NodeJS</h3>
+<p>On our existing server, where we had already installed Varnish, setting up a hello-world Node app was just as simple. We installed the <code>nodejs</code> and <code>npm</code> packages and linked NodeJS to Node:</p>
+<pre><code class="lang-bash">ln -s /usr/bin/nodejs /usr/bin/node
+</code></pre>
+<p>Then we created a simple node <em>hello-world</em> program listening on port 8080:</p>
+<pre><code class="lang-javascript">#!/usr/bin/env nodejs
+
+var http = require(&#39;http&#39;);
+http.createServer(function (req, res) {
+        res.writeHead(200, {&#39;Content-Type&#39;: &#39;text/plain&#39;});
+        res.end(&#39;Hello World\n&#39;);
+}).listen(8080, &#39;localhost&#39;);
+
+console.log(&#39;Server running at http://localhost:8080/&#39;);
+</code></pre>
+<p>Then we installed Node&#39;s package manager, <a href="http://pm2.keymetrics.io/">PM2</a>, to be able to daemonize our app:</p>
+<pre><code class="lang-bash">sudo npm install -g pm2
+
+pm2 start index.js
+</code></pre>
+<p>aAnd voila --- our Node app was being served by Varnish:</p>
+<p><img src="../images/1511065933node-pingdom-1024x292.jpg" alt="Node Hello World - Pingdom"></p>
+<h2 id="other-tips">Other Tips</h2>
+<p>To be able to control whether or not our request is being cached in our browser inspector, we ought to add the following snippet to our Varnish config file, into the <code>sub vcl_deliver</code> block:</p>
+<pre><code class="lang-javascript">sub vcl_deliver {
+    if (obj.hits &gt; 0) {
+    set resp.http.X-Cache = &quot;HIT&quot;;
+    } else {
+    set resp.http.X-Cache = &quot;MISS&quot;;
+    }
+}
+</code></pre>
+<p>Then we can see the feedback in our response headers as <em>HIT or MISS</em>:</p>
+<p><img src="../images/1511065974response-headers.jpg" alt="Response Headers"></p>
+<p>One more warning: Varnish (or at least the open-source version) <a href="https://varnish-cache.org/docs/trunk/phk/ssl.html">doesn&#39;t support SSL</a>, reiterated <a href="https://varnish-cache.org/docs/trunk/phk/ssl_again.html">again</a> by its creator Poul-Henning Kamp (who is <a href="http://queue.acm.org/detail.cfm?id=2716278">not shy to voice his opinions</a>). So when you need to use Varnish and HTTPS, consider using another proxy in front of it for <a href="https://komelin.com/articles/https-varnish">SSL termination</a> --- such as <a href="https://z0z0.me/create-your-own-cdn-with-haproxy-and-varnish/">haproxy</a>, or Varnish&#39;s own <a href="https://github.com/varnish/hitch">hitch</a>.</p>
+<p>Or, if that&#39;s getting too involved, just use <a href="https://www.scalescale.com/tips/nginx/configure-nginx-fastcgi-cache/#">Nginx and FastCGI Cache</a>.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>In this article we tried to give a brief introduction to Varnish Cache without going too deeply into its setup, monitoring and administration.</p>
+<p>Tuning server performance is a science of its own, and presenting the full scope of use cases and setups requires another article. I&#39;ll be diving a bit deeper into this subject in another article, so stay tuned for a future installment, where I&#39;ll add Varnish in front of a real app.</p>
+</div>

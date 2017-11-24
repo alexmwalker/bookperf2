@@ -1,0 +1,238 @@
+.box {
+    background-color: color(backgrounds, box-body);
+    margin: 1.5rem 0 1.5rem 0rem;
+    position: relative;
+    z-index: 1;
+    border: 1px color(backgrounds, box-title) solid;
+    border-width: 0 1px 1px 1px;
+    border-radius: 25px;
+}
+
+.box h4 {
+    background-color: color(backgrounds, box-title);
+    //font-size: 12pt;
+    padding: $title-padding;
+    margin: 1.5rem 0 0.75rem 0;
+    line-height: 1.95rem;
+    border-radius: 25px;
+    color: #345;
+}
+
+.box .body {
+    font-size: 9pt;
+    padding: 0 2rem;
+    
+}
+
+.box .body p {
+    margin: 0;
+    padding: 0 0 0.75rem 0;
+    line-height: 1.5rem;
+    font-weight: 300;
+}
+
+.box.tip h4,
+.box.codepen h4,
+.box.note h4,
+.box.attention h4,
+.box.warning h4 {
+    padding-left: 3rem;
+}
+
+.box.tip .body,
+.box.note .body,
+.box.codepen .body,
+.box.attention .body,
+.box.warning .body {
+    padding-left: 3rem;
+}
+
+.box.tip:before {
+    background: url(../images/box-tip.svg);
+    @include box-icon;
+}
+
+.box.note:before {
+    background: url(../images/box-note.svg);
+    @include box-icon;
+}
+
+.box.attention:before {
+    background: url(../images/box-attention.svg);
+    @include box-icon;
+}
+
+.box.warning:before {
+    background: url(../images/box-warning.svg);
+    @include box-icon;
+}
+
+.box.codepen:before {
+    background: url(../images/box-codepen.svg);
+    @include box-icon;
+}
+
+/* code*/
+figure{
+    margin: 0;
+    -webkit-margin-before: 0em;
+    -webkit-margin-after: 0em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+}
+.codeblock {
+    @include font-monospace;
+    //background-color: color(backgrounds, codeblock);
+    padding: $code-padding;
+}
+
+.codefig code{
+    @include font-monospace;
+    white-space: pre-line;
+    //background-color: color(backgrounds, codeblock);
+    //padding: $code-padding;
+}
+
+.codefig figcaption {
+    //background-color: color(backgrounds, codeheading);
+    //color: color(theme, blue);
+    font-size: 8pt;
+    font-weight: bold;
+    text-align: right;
+    font-family: "Libre Franklin";
+    padding: $title-padding;
+    margin: 0;
+    height: 1rem;
+    background-color: #eae4e1;
+    margin-bottom: 0;
+}
+pre[class*="language-"] {
+    padding: 1.5rem;
+    margin: 0 0 1.5rem 0;
+    overflow: auto;
+}
+
+/* tables */
+table {
+    border-collapse: collapse;
+    margin-top: 1em;
+}
+
+table caption {
+    font-weight: bold;
+    text-align: left;
+    font-size: 12pt;
+    padding-bottom: 5pt;
+}
+
+table tbody{
+    border-bottom: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+}
+
+table thead{
+    border-top: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+}
+
+th {
+    background-color: color(backgrounds, table-header);
+    padding: 0.3em;
+    text-align: left;
+}
+
+td {
+    padding: 0.3em;
+    vertical-align: top;
+}
+
+.table-striped tr:nth-child(2n){
+    background-color: color(backgrounds, table-row);
+}
+
+/* figures*/
+img {
+  max-width: 100%;
+  //max-height: $page-height - 50pt;
+}
+
+.imagefig {
+    text-align: center;
+
+}
+
+.imagefig img {
+    display: block;
+    max-width: 100%;
+}
+
+.imagefig figcaption {
+    font-size: 8pt;
+    margin-bottom: 1.5rem;
+    line-height: 1.5rem;
+    font-family: "Libre Franklin";
+}
+
+/* other images */
+
+.image-inline {
+    max-width: 100%;
+}
+
+.image-left {
+    float: left;
+    margin: 0 10pt 10pt 0;
+}
+
+.image-right {
+    float:right;
+    margin: 0 0 10pt 10pt;
+}
+
+.image-center {
+    display: block;
+    margin: 0 auto;
+}
+
+.image-left + p, .image-right + p {
+    margin-top: 0;
+}
+
+.block{
+    page-break-inside: avoid;
+    page-break-after: always;
+}
+
+.breakbefore{
+    page-break-before: always;
+    break-before: always
+}
+
+
+
+/* */
+blockquote {
+    background: #f0f2f5;
+    margin: 0 0 1.5rem;
+    padding: 1.5rem 2em;
+    letter-spacing: 1px;
+    border-left: 5px solid #c6c8dd;
+    p {
+        color: #505275;
+        font-family: Georgia, Times, "Times New Roman", serif;
+        font-style: italic;
+        margin-bottom: 0;
+        font-weight: 300;
+    }
+}
+.chapter p code, .chapter li code{
+    font-style: italic;
+    background: #f5f2f0;
+    font-size: 0.9rem;
+    padding: 0 5px;
+}
+table {
+    width:95%
+}

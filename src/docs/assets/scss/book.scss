@@ -1,0 +1,28 @@
+/*
+SitePoint Book CSS.
+Author: Alex Walker based on Rachel Andrew's initial work
+Details: A stylesheet for formatting SitePoint books. This stylesheet imports the other CSS and can also be used to add specific things for the current project. */
+
+/* import other stylesheets */
+@import 'prism';
+@import 'config';
+//@import 'fonts';  currently the old fonts
+@import 'lib';
+@import 'page-setup';
+@import 'typography';
+@import 'components';
+@import 'overrides'; // Prism overrides
+//@import 'page-fake'; // this is temporary PDF live-reload emulation code.
+
+
+
+/* add things here specific to this book */
+
+/* classes to control column width of tables*/
+.table-3-col {
+    @include table-columns(20% 40% 40%);
+}
+
+.table-5-col {
+    @include table-columns(20% 20% 20% 20% 20%);
+}

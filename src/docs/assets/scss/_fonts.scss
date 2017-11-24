@@ -1,0 +1,166 @@
+/* importing fonts we use
+
+@font-face {
+    font-family: "arrus";
+    font-style: normal;
+    font-weight: normal;
+    src: url($local-path+"src/assets/fonts/arrusBT_roman.TTF")
+}
+
+@font-face {
+    font-family: "arrus";
+    font-style: italic;
+    font-weight: normal;
+    src: url($local-path+"src/assets/fonts/arrusBT_italic.TTF")
+}
+
+@font-face {
+    font-family: "arrus";
+    font-style: normal;
+    font-weight: bold;
+    src: url($local-path+"src/assets/fonts/arrusBT_bold.TTF")
+}
+
+@font-face {
+    font-family: "arrus";
+    font-style: italic;
+    font-weight: bold;
+    src: url($local-path+"src/assets/fonts/arrusBT_bolditalic.TTF")
+}
+
+@font-face {
+    font-family: 'PT Mono', monospace;
+    font-style: normal;
+    font-weight: normal;
+    src: url($local-path+"src/assets/fonts/Monospac821BT_roman.TTF")
+}
+
+@font-face {
+    font-family: 'PT Mono', monospace;
+    font-style: italic;
+    font-weight: normal;
+    src: url($local-path+"src/assets/fonts/Monospac821BT_italic.TTF")
+}
+
+@font-face {
+    font-family: 'PT Mono', monospace;
+    font-style: normal;
+    font-weight: bold;
+    src: url($local-path+"src/assets/fonts/Monospac821BT_bold.TTF")
+}
+
+@font-face {
+    font-family: 'PT Mono', monospace;
+    font-style: italic;
+    font-weight: bold;
+    src: url($local-path+"src/assets/fonts/Monospac821BT_bolditalic.TTF")
+}
+
+
+@font-face {
+    font-family: "Raleway";
+    font-style: normal;
+    font-weight: normal;
+    src: url($local-path+"src/assets/fonts/chiantiBT_roman.TTF")
+}
+
+@font-face {
+    font-family: "Raleway";
+    font-style: italic;
+    font-weight: normal;
+    src: url($local-path+"src/assets/fonts/chiantiBT_italic.TTF")
+}
+
+@font-face {
+    font-family: "Raleway";
+    font-style: normal;
+    font-weight: bold;
+    src: url($local-path+"src/assets/fonts/chiantiBT_bold.TTF")
+}
+
+@font-face {
+    font-family: "Raleway";
+    font-style: italic;
+    font-weight: bold;
+    src: url($local-path+"src/assets/fonts/chiantiBT_bolditalic.TTF")
+}
+
+/* Melior */
+@font-face {
+    font-family: "Libre Franklin";
+    font-style: normal;
+    font-weight: normal;
+    src: url($local-path+"src/assets/fonts/MeliorLTStd.otf")
+}
+
+@font-face {
+    font-family: "Libre Franklin";
+    font-style: italic;
+    font-weight: normal;
+    src: url($local-path+"src/assets/fonts/MeliorLTStd-Italic.otf")
+}
+
+@font-face {
+    font-family: "Libre Franklin"";
+    font-style: normal;
+    font-weight: bold;
+    src: url($local-path+"src/assets/fonts/MeliorLTStd-Bold.otf")
+}
+
+@font-face {
+    font-family: "Libre Franklin"";
+    font-style: italic;
+    font-weight: bold;
+    src: url($local-path+"src/assets/fonts/MeliorLTStd-BoldItalic.otf")
+}
+
+/* Rotis */
+@font-face {
+    font-family: "Libre Franklin"";
+    font-style: normal;
+    font-weight: normal;
+    src: url($local-path+"src/assets/fonts/RotisSemiSansStd.otf")
+}
+
+@font-face {
+    font-family: "Libre Franklin"";
+    font-style: italic;
+    font-weight: normal;
+    src: url($local-path+"src/assets/fonts/RotisSemiSansStd-Italic.otf")
+}
+
+@font-face {
+    font-family: "Libre Franklin"";
+    font-style: normal;
+    font-weight: bold;
+    src: url($local-path+"src/assets/fonts/RotisSemiSansStd-Bold.otf")
+}
+
+/* StoneSans */
+@font-face {
+    font-family: "Raleway";
+    font-style: normal;
+    font-weight: normal;
+    src: url($local-path+"src/assets/fonts/StoneSansStd-Medium.otf")
+}
+
+@font-face {
+    font-family: "Raleway";
+    font-style: italic;
+    font-weight: normal;
+    src: url($local-path+"src/assets/fonts/StoneSansStd-MediumItalic.otf")
+}
+
+@font-face {
+    font-family: "Raleway";
+    font-style: normal;
+    font-weight: bold;
+    src: url($local-path+"src/assets/fonts/StoneSansStd-Bold.otf")
+}
+
+@font-face {
+    font-family: "Raleway";
+    font-style: italic;
+    font-weight: bold;
+    src: url($local-path+"src/assets/fonts/StoneSansStd-BoldItalic.otf")
+}

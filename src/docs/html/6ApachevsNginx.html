@@ -1,0 +1,226 @@
+<div class="chapter"><div class="ch-head">Chapter</div>    <h1 class="chaptertitle"> Apache vs Nginx Performance: Optimization Techniques</h1>    <h3 class="author">Tonino Jankov</h3><p>Some years ago, the <a href="https://httpd.apache.org/">Apache Foundation&#39;s web server</a>, known simply as &quot;Apache&quot;, was so ubiquitous that it became synonymous with the term &quot;web server&quot;. Its daemon process on Linux systems has the name <em>httpd</em> (meaning simply <em>http process</em>) --- and comes preinstalled in major Linux distributions.</p>
+<p>It was initially released in 1995, and, to <a href="https://en.wikipedia.org/wiki/Apache_HTTP_Server">quote Wikipedia</a>, <em>&quot;it played a key role in the initial growth of the World Wide Web&quot;</em>. It is still the most-used web server software <a href="https://w3techs.com/blog/entry/fact_20170828">according to W3techs</a>. However, according to those reports which <a href="https://w3techs.com/technologies/history_overview/web_server/ms/y">show some trends of the last decade</a> and <a href="https://w3techs.com/technologies/comparison/ws-apache,ws-microsoftiis,ws-nginx">comparisons to other solutions</a>, its market share is decreasing. The reports given by <a href="https://news.netcraft.com/archives/2017/09/11/september-2017-web-server-survey.html">Netcraft</a> and <a href="https://trends.builtwith.com/web-server">Builtwith</a> differ a bit, but all agree on a trending decline of Apache&#39;s market share and the growth of Nginx.</p>
+<p><strong>Nginx</strong> --- pronounced <em>engine x</em> --- was released in 2004 by <a href="https://www.wikiwand.com/en/Igor_Sysoev">Igor Sysoev</a>, with the explicit intent to outperform Apache. Nginx&#39;s website has <a href="https://www.nginx.com/blog/nginx-vs-apache-our-view/">an article worth reading</a> which compares these two technologies. At first, it was mostly used as a supplement to Apache, mostly for serving static files, but it has been steadily growing, as it has been evolving to deal with the full spectrum of web server tasks.</p>
+<p>It is often used as a <a href="https://www.nginx.com/resources/admin-guide/reverse-proxy/">reverse proxy</a>, <a href="http://nginx.org/en/docs/http/load_balancing.html">load balancer</a>, and for <a href="https://www.nginx.com/blog/nginx-caching-guide/">HTTP caching</a>. CDNs and video streaming providers use it to build their content delivery systems where performance is critical.</p>
+<p>Apache has been around for a long time, and it has a <a href="https://www.wikiwand.com/en/List_of_Apache_modules">big choice of modules</a>. Managing Apache servers is known to be user-friendly. <a href="http://howtolamp.com/lamp/httpd/2.4/dso/">Dynamic module loading</a> allows for different modules to be compiled and added to the Apache stack without recompiling the main server binary. Oftentimes, modules will be in Linux distro repositories, and after installing them through system package managers, they can be gracefully added to the stack with commands like <a href="http://manpages.ubuntu.com/manpages/yakkety/man8/a2enmod.8.html">a2enmod</a>. This kind of flexibility has yet to be seen with Nginx. When we look at a <a href="http://nginx.org/en/docs/http/ngx_http_v2_module.html">guide for setting up Nginx for HTTP/2</a>, modules are something Nginx needs to be built with --- configured for at build-time.</p>
+<p>One other feature that has contributed to Apache&#39;s market rule is the <a href="http://www.htaccess-guide.com/">.htaccess file</a>. It is Apache&#39;s silver bullet, which made it a go-to solution for the shared hosting environments, as it allows controlling the server configuration on a directory level. Every directory on a server served by Apache can have its own <code>.htaccess</code> file.</p>
+<p>Nginx not only has no equivalent solution, but <a href="https://www.nginx.com/resources/wiki/start/topics/examples/likeapache-htaccess/">discourages</a> such usage due to performance hits.</p>
+<p><img src="../images/1510712027server-share-netcraft.png" alt="Server share stats, by Netcraft"></p>
+<p><em>Server vendors market share 1995–2005. <a href="http://www.netcraft.com/">Data by Netcraft</a></em></p>
+<p><a href="https://www.litespeedtech.com/products/litespeed-web-server">LiteSpeed</a>, or LSWS, is one server contender that has a level of flexibility that can compare to Apache, while not sacrificing performance. It supports Apache-style <code>.htaccess</code>, <code>mod_security</code> and <code>mod_rewrite</code>, and it&#39;s worth considering for shared setups. It was planned as a drop-in replacement for Apache, and it works with cPanel and Plesk. It&#39;s been supporting HTTP/2 since 2015.</p>
+<p><a href="https://www.hivelocity.net/kb/what-is-litespeed/">LiteSpeed has three license tiers</a>, OpenLiteSpeed, LSWS Standard and LSWS Enterprise. Standard and Enterprise <a href="https://www.interserver.net/tips/kb/litespeed-cache-lscache-details-advantages/">come with an optional</a> caching solution comparable to Varnish, LSCache, <a href="https://www.litespeedtech.com/support/wiki/doku.php/litespeed_wiki:cache">which is built into the server itself</a>, and can be controlled, with rewrite rules, in <code>.htaccess</code> files (per directory). <a href="https://www.litespeedtech.com/products/litespeed-web-server/features/anti-ddos-advances">It also comes with some DDOS-mitigating &quot;batteries&quot; built in</a>. This, along with its event-driven architecture, makes it a solid contender, targeting primarily <a href="https://www.a2hosting.com/litespeed-hosting">performance-oriented hosting providers</a>, but it could be worth setting up even for smaller servers or websites.</p>
+<h2 id="hardware-considerations">Hardware Considerations</h2>
+<p>When optimizing our system, we cannot emphasize enough giving due attention to our hardware setup. Whichever of these solutions we choose for our setup, having enough RAM is critical. When a web server process, or an interpreter like PHP, don&#39;t have enough RAM, they start swapping, and swapping effectively means using the hard disk to supplement RAM memory. The effect of this is increased latency every time this memory is accessed. This takes us to the second point --- the hard disk space. Using fast SSD storage is another critical factor of our website speed. We also need to mind the CPU availability, and the physical distance of our server&#39;s data centers to our intended audience.</p>
+<p>To dive in deeper into the hardware side of performance tuning, <a href="https://blogs.dropbox.com/tech/2017/09/optimizing-web-servers-for-high-throughput-and-low-latency/">Dropbox has a good article</a>.</p>
+<h2 id="monitoring">Monitoring</h2>
+<p>One practical way to monitor our current server stack performance, per process in detail, is <a href="http://hisham.hm/htop/">htop</a>, which works on Linux, Unix and macOS, and gives us a colored overview of our processes.</p>
+<p><img src="../images/1510712087htop-1024x667.gif" alt="HTOP"></p>
+<p>Other monitoring tools are <a href="https://newrelic.com/">New Relic</a>, a premium solution with a comprehensive set of tools, and <a href="https://my-netdata.io/">Netdata</a>, an open-source solution which offers great extensibility, fine-grained metrics and a customizable web dashboard, suitable for both little VPS systems and monitoring a network of servers. It can send alarms for any application or system process via email, Slack, pushbullet, Telegram, Twilio etc.</p>
+<p><img src="../images/1510712717netdata-sm-1024x697.gif" alt="Netdata dashboard"></p>
+<p><strong><a href="https://www.cyberciti.biz/faq/how-to-install-and-use-monit-on-ubuntudebian-linux-server/">Monit</a></strong> is another, headless, open-source tool which can monitor the system, and can be configured to alert us, or restart certain processes, or reboot the system when some conditions are met.</p>
+<h2 id="testing-the-system">Testing the System</h2>
+<p><a href="https://httpd.apache.org/docs/2.4/programs/ab.html">AB</a> --- Apache Benchmark --- is a simple load-testing tool by Apache Foundation, and <a href="https://www.joedog.org/siege-home/">Siege</a> is another load-testing program. This <a href="https://kalamuna.atlassian.net/wiki/spaces/KALA/pages/16023587/Testing+With+Apache+Benchmark+and+Siege">article</a> explains how to set them both up, and <a href="https://blog.getpolymorph.com/7-tips-for-heavy-load-testing-with-apache-bench-b1127916b7b6">here</a> we have some more advanced tips for AB, while an in-depth look at Siege can be found <a href="https://www.sitepoint.com/web-app-performance-testing-siege-plan-test-learn/">here</a>.</p>
+<p>If you prefer a web interface, there is <a href="https://locust.io/">Locust</a>, a Python-based tool that comes in very handy for testing website performance.</p>
+<p><img src="../images/1510712839locust-i-1024x699.gif" alt="Locust installation"></p>
+<p>After we install Locust, we need to <a href="https://docs.locust.io/en/latest/writing-a-locustfile.html">create a locustfile</a> in the directory from which we will launch it:</p>
+<pre><code class="lang-python">    from locust import HttpLocust, TaskSet, task
+
+    class UserBehavior(TaskSet):
+        @task(1)
+        def index(self):
+            self.client.get(&quot;/&quot;)
+
+        @task(2)
+        def shop(self):
+            self.client.get(&quot;/?page_id=5&quot;)
+
+        @task(3)
+        def page(self):
+            self.client.get(&quot;/?page_id=2&quot;)
+
+    class WebsiteUser(HttpLocust):
+        task_set = UserBehavior
+        min_wait = 300
+        max_wait = 3000
+</code></pre>
+<p>Then we simply launch it from the command line:</p>
+<pre><code class="lang-bash">    locust --host=https://my-website.com
+</code></pre>
+<p>One warning with these load-testing tools: they have the effect of a DDoS attack, so it&#39;s recommended you limit testing to your own websites.</p>
+<h2 id="tuning-apache">Tuning Apache</h2>
+<h3 id="apache-s-mpm-modules">Apache&#39;s mpm modules</h3>
+<p>Apache dates to 1995 and the early days of the internet, when an accepted way for servers to operate was to spawn a new process on each incoming TCP connection and to reply to it. If more connections came in, more worker processes were created to handle them. The costs of spawning new processes were high, and Apache developers devised a <em>prefork</em> mode, with a pre-spawned number of processes. Embedded dynamic language interpreters within each process (like <a href="https://stackoverflow.com/questions/2712825/what-is-mod-php">mod_php</a>) were still costly, and <a href="https://serverfault.com/questions/823121/why-is-apache-spawning-so-many-processes/823162">server crashes</a> with Apache&#39;s default setups became common. Each process was only able to handle a single incoming connection.</p>
+<p>This model is known as _<a href="http://httpd.apache.org/docs/2.4/mod/prefork.html">mpm_prefork_module</a>_ within Apache&#39;s <a href="https://httpd.apache.org/docs/trunk/mpm.html#dynamic">MPM</a> (Multi-Processing Module) system. <a href="http://httpd.apache.org/docs/2.4/mod/prefork.html">According to Apache&#39;s website</a>, this mode requires little configuration, because it is self-regulating, and <em>most important is that the <code>MaxRequestWorkers</code> directive be big enough to handle as many simultaneous requests as you expect to receive, but small enough to ensure there&#39;s enough physical RAM for all processes</em>.</p>
+<p><img src="../images/1510712932libapache2-mod-php7-1024x655.gif" alt="libapache2-mod-php7 mpm_prefork HTOP report"></p>
+<p><em>A small Locust load test that shows spawning of huge number of Apache processes to handle the incoming traffic.</em></p>
+<p>We may add that this mode is maybe the biggest cause of Apache&#39;s bad name. It can get resource-inefficient.</p>
+<p>Version 2 of Apache brought another two MPMs that try to solve the issues that <em>prefork</em> mode has. These are <a href="http://httpd.apache.org/docs/2.4/mod/worker.html"><em>worker module</em></a>, or _mpm_worker<em>module</em>, and <a href="http://httpd.apache.org/docs/2.4/mod/event.html"><em>event module</em></a>.</p>
+<p>Worker module is not process-based anymore; it&#39;s a hybrid process-thread based mode of operation. Quoting <a href="http://httpd.apache.org/docs/2.4/mod/worker.html">Apache&#39;s website</a>,</p>
+<blockquote>
+<p>a single control process (the parent) is responsible for launching child processes. Each child process creates a fixed number of server threads as specified in the <code>ThreadsPerChild</code> directive, as well as a listener thread which listens for connections and passes them to a server thread for processing when they arrive.</p>
+</blockquote>
+<p>This mode is more resource efficient.</p>
+<p>2.4 version of Apache brought us the third MPM --- <a href="http://httpd.apache.org/docs/2.4/mod/event.html">event module</a>. It is based on worker MPM, and added a separate listening thread that manages dormant keepalive connections after the HTTP request has completed. It&#39;s a non-blocking, asynchronous mode with a smaller memory footprint. More about version 2.4 improvements <a href="https://www.slideshare.net/jimjag/apachecon-2017-whats-new-in-httpd-24">here</a>.</p>
+<p>We have loaded a testing WooCommerce installation with around 1200 posts on a virtual server and tested it on Apache 2.4 with the default, prefork mode, and mod_php.</p>
+<p>First we tested it with <a href="https://packages.debian.org/sid/amd64/libapache2-mod-php7.0">libapache2-mod-php7</a> and mpm_prefork_module at <a href="https://tools.pingdom.com">https://tools.pingdom.com</a>:</p>
+<p><img src="../images/1510712991h2-mpm-prefork-1024x325.png" alt="mpm prefork test"></p>
+<p>Then, we went for testing the event MPM module.</p>
+<p>We had to add <code>multiverse</code> to our <code>/etc/apt/sources.list</code>:</p>
+<pre><code class="lang-bash">deb http://archive.ubuntu.com/ubuntu xenial main restricted universe multiverse
+deb http://archive.ubuntu.com/ubuntu xenial-updates main restricted universe multiverse
+deb http://security.ubuntu.com/ubuntu xenial-security main restricted universe multiverse
+deb http://archive.canonical.com/ubuntu xenial partner
+</code></pre>
+<p>Then we did <code>sudo apt-get update</code>and installed <code>libapache2-mod-fastcgi</code> and php-fpm:</p>
+<pre><code class="lang-bash">sudo apt-get install libapache2-mod-fastcgi php7.0-fpm
+</code></pre>
+<p>Since php-fpm is a service separate from Apache, it needed a restart:</p>
+<pre><code class="lang-bash">sudo service start php7.0-fpm
+</code></pre>
+<p>Then we disabled the prefork module, and enabled the event mode and proxy_fcgi:</p>
+<pre><code class="lang-bash">sudo a2dismod php7.0 mpm_prefork
+sudo a2enmod mpm_event proxy_fcgi
+</code></pre>
+<p>We added this snippet to our Apache virtual host:</p>
+<pre><code class="lang-cnf">&amp;lt;filesmatch &quot;\.php$&quot;&amp;gt;
+    SetHandler &quot;proxy:fcgi://127.0.0.1:9000/&quot;
+&amp;lt;/filesmatch&amp;gt;
+</code></pre>
+<p>This port needs to be consistent with php-fpm configuration in <code>/etc/php/7.0/fpm/pool.d/www.conf</code>. More about the php-fpm setup <a href="https://wiki.apache.org/httpd/PHP-FPM">here</a>.</p>
+<p>Then we tuned the mpm_event configuration in <code>/etc/apache2/mods-available/mpm_event.conf</code>, keeping in mind that our mini-VPS resources for this test were constrained --- so we merely reduced some default numbers. Details about every directive on Apache&#39;s <a href="http://httpd.apache.org/docs/current/mod/mpm_common.html">website</a>, and tips specific to the event mpm <a href="http://httpd.apache.org/docs/2.4/mod/event.html">here</a>. Keep in mind that started <em>servers</em> consume an amount of memory regardless of how busy they are. The <code>MaxRequestWorkers</code> directive sets the limit on the number of simultaneous requests allowed: setting <code>MaxConnectionsPerChild</code> to a value other than zero is important, because it prevents a possible memory leak.</p>
+<pre><code class="lang-cnf">&lt;ifmodule mpm_event_module&gt;
+        StartServers              1
+        MinSpareThreads          30
+        MaxSpareThreads          75
+        ThreadLimit              64
+        ThreadsPerChild          30
+        MaxRequestWorkers        80
+        MaxConnectionsPerChild   80
+&lt;/ifmodule&gt;
+</code></pre>
+<p>Then we restarted the server with <code>sudo service apache2 restart</code> (if we change some directives, like ThreadLimit, we will need to stop and start the service explicitly, with <code>sudo service apache2 stop; sudo service apache2 start</code>).</p>
+<p>Our tests on <a href="https://tools.pingdom.com">Pingdom</a> now showed page load time reduced by more than half:</p>
+<p><img src="../images/1510713042h2-proxy-fcgi-edited-1024x324.png" alt="Pingdom test"></p>
+<h3 id="other-tips-for-tuning-apache-">Other tips for tuning Apache:</h3>
+<p><strong>Disabling .htaccess</strong>: htaccess allows setting specific configuration for every single directory in our server root, without restarting. So, traversing all the directories, looking for the .htaccess files, on every request, incurs a performance penalty.</p>
+<p>Quote from the Apache docs:</p>
+<blockquote>
+<p>In general, you should only use <code>.htaccess</code> files when you don’t have access to the main server configuration file.<em> … in general, use of <code>.htaccess</code> files should be avoided when possible. Any configuration that you would consider putting in a <code>.htaccess</code> file, can just as effectively be made in a <code>&lt;directory&gt;</code> section in your main server configuration file.</em></p>
+</blockquote>
+<p>The solution is to disable it in <code>/etc/apache2/apache2.conf</code>:</p>
+<pre><code class="lang-cnf">AllowOverride None
+</code></pre>
+<p>If we need it for the specific directories, we can then enable it within sections in our virtual host files:</p>
+<pre><code class="lang-cnf">AllowOverride All
+</code></pre>
+<p>Further tips include:</p>
+<ul>
+<li><p><strong><a href="http://httpd.apache.org/docs/current/mod/mod_expires.html">Control the browser cache with mod_expires</a></strong> --- by setting the expires headers.</p>
+</li>
+<li><p>Keep <strong>HostNameLookups</strong> turned off --- <code>HostNameLookups Off</code> is the default since Apache 1.3, but make sure it stays off, because it can incur a performance penalty.</p>
+</li>
+<li><p><strong>Apache2buddy</strong> is a simple script that we can run and get tips for tuning our system: <code>curl -sL https://raw.githubusercontent.com/richardforth/apache2buddy/master/apache2buddy.pl | perl</code></p>
+</li>
+</ul>
+<p><img src="../images/1510713088apache2buddy-1024x609.gif" alt="apache2buddy"></p>
+<h2 id="nginx">Nginx</h2>
+<p>Nginx is an <a href="https://www.nginx.com/blog/inside-nginx-how-we-designed-for-performance-scale/">event-driven</a> and non-blocking web server. To quote one poster <a href="https://news.ycombinator.com/item?id=8343350">on Hacker News</a>,</p>
+<blockquote>
+<p>Forking processes is incredibly expensive compared to an event loop. Event-based HTTP servers inevitably won.</p>
+</blockquote>
+<p>This statement sparked quite a debate on Hacker News, but from our experience, just switching from a mpm_prefork Apache to Nginx can often mean saving the website from crashing. Simple switching to Nginx is very often a cure in itself.</p>
+<p><img src="../images/1510713144nginx-arch-1024x610.png" alt="Nginx architecture"></p>
+<p>A more thorough visual explanation of Nginx architecture can be found <a href="https://www.nginx.com/resources/library/infographic-inside-nginx/">here</a>.</p>
+<h3 id="nginx-settings">Nginx settings</h3>
+<p>Nginx recommends pinning the number of workers to number of PC cores (just like we did with Apache&#39;s mpm_event configuration), by setting <code>worker_processes</code> to <code>auto</code> (default is 1) in <code>/etc/nginx/nginx.conf</code>.</p>
+<p><code>worker_connections</code> sets the number of connections every worker process can handle. The default is 512, but it can usually be increased.</p>
+<p><strong><a href="https://en.wikipedia.org/wiki/Keepalive">Keepalive connections</a></strong> are a server aspect that impacts performance, which <a href="https://www.nginx.com/blog/http-keepalives-and-web-performance/">isn&#39;t usually visible in benchmarks</a>.</p>
+<p><img src="../images/1510713195keepalive-firefox-1024x615.gif" alt="keepalive.cf"></p>
+<p><a href="https://www.nginx.com/blog/http-keepalives-and-web-performance/">According to the Nginx website</a>,</p>
+<blockquote>
+<p>HTTP keepalive connections are a necessary performance feature that reduce latency and allow web pages to load faster.</p>
+</blockquote>
+<p>Establishing new TCP connections <a href="https://en.wikipedia.org/wiki/Handshaking">can be costly</a> --- not to mention when there is <em>HTTPS</em> encryption involved. The <a href="https://http2.github.io/">HTTP/2</a> protocol mitigates this with its <a href="https://en.wikipedia.org/wiki/Multiplexing">multiplexing features</a>. Reusing an existing connection can reduce request times.</p>
+<p>Apache&#39;s mpm_prefork and mpm_worker suffer from concurrency limitations that contrast the keepalive event loop. This is somewhat fixed in Apache 2.4, in mpm_event module, and comes as the only, default mode of operation in Nginx. Nginx workers can handle thousands of incoming connections simultaneously, and if it&#39;s used as a reverse proxy or a load balancer, Nginx then uses a local pool of keepalive connections, without TCP connection overhead.</p>
+<p><a href="http://nginx.org/en/docs/http/ngx_http_core_module.html?&amp;_ga=2.26969269.942121935.1510206018-994710012.1508256997#keepalive_requests"><code>keepalive_requests</code></a> is a setting that regulates the number of requests a client can make over a single keepalive connection. <a href="http://nginx.org/en/docs/http/ngx_http_core_module.html?&amp;_ga=2.191644834.942121935.1510206018-994710012.1508256997#keepalive_timeout"><code>keepalive_timeout</code></a> sets the time an idle keepalive connection stays open.</p>
+<p><a href="http://nginx.org/en/docs/http/ngx_http_upstream_module.html?&amp;_ga=2.203640216.942121935.1510206018-994710012.1508256997#keepalive"><code>keepalive</code></a> is a setting pertaining to an Nginx connection to an upstream server --- when it acts as a proxy or load balancer. This means the number of idle keepalive upstream connections per worker process.</p>
+<p>Enabling the upstream keepalive connections requires putting these directives into the Nginx main configuration:</p>
+<pre><code class="lang-cnf">proxy_http_version 1.1;
+proxy_set_header Connection &quot;&quot;;
+</code></pre>
+<p>Nginx upstream connections are managed by <a href="http://nginx.org/en/docs/http/ngx_http_upstream_module.html">ngx_http_upstream_module</a>.</p>
+<p>If our front-end application keeps polling our back-end application for updates, increasing the <code>keepalive_requests</code> and <code>keepalive_timeout</code> will limit the number of connections that need to be established. The <code>keepalive</code> directive shouldn&#39;t be too large, to allow for other connections to reach our upstream server.</p>
+<p>The tuning of these settings is done on a per-case basis, and needs to be tested. That is maybe one reason why <code>keepalive</code> doesn&#39;t have a default setting.</p>
+<h4 id="using-unix-sockets">Using unix sockets</h4>
+<p>By default, Nginx uses a separate PHP process to which it forwards PHP file requests. In this, it acts as a proxy (just like Apache when we set it up with php7.0-fpm).</p>
+<p>Often our virtual host setup with Nginx will look like this:</p>
+<pre><code class="lang-cnf">location ~ \.php$ {
+    fastcgi_param REQUEST_METHOD $request_method;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    fastcgi_pass 127.0.0.1:9000;
+}
+</code></pre>
+<p>Since FastCGI is a different protocol from HTTP, the first two lines are forwarding some arguments and headers to php-fpm, while the third line specifies the way to proxy our request --- over a local network socket.</p>
+<p>This is practical for multi-server setups, since we can also specify remote servers to proxy requests to.</p>
+<p>But if we&#39;re hosting our whole setup on a single system, we should use a Unix socket to connect to the listening php process:</p>
+<pre><code class="lang-cnf">fastcgi_pass unix:/var/run/php7.0-fpm.sock;
+</code></pre>
+<p>Unix sockets are <a href="https://stackoverflow.com/questions/257433/postgresql-unix-domain-sockets-vs-tcp-sockets/257479#257479">considered to have better performance than TCP</a>, and this setup is considered safer. You can find more details about this setup in this <a href="https://support.rackspace.com/how-to/install-nginx-and-php-fpm-running-on-unix-file-sockets/">article by Rackspace</a>.</p>
+<p>This tip regarding Unix sockets is also applicable for Apache. More details <a href="https://wiki.apache.org/httpd/PHP-FPM">here</a>.</p>
+<p><strong>gzip_static</strong>: the accepted wisdom around web server performance is to compress our static assets. This often means we&#39;ll try to compromise, and try to compress only files that are above some threshold, because compressing resources on the fly, with every request, can be expensive. Nginx has a <code>gzip_static</code> directive that allows us to serve gzipped versions of files --- with extension .gz --- instead of regular resources:</p>
+<pre><code class="lang-cnf">location /assets {
+    gzip_static on;
+}
+</code></pre>
+<p>This way, Nginx will try to serve <code>style.css.gz</code> instead of <code>style.css</code> (we need to take care of the gzipping ourselves, in this case).</p>
+<p>This way, the CPU cycles won&#39;t be wasted through on-the-fly compression for every request.</p>
+<h3 id="caching-with-nginx">Caching with Nginx</h3>
+<p>The story about Nginx wouldn&#39;t be complete without mentioning how to cache content. Nginx caching is so efficient that many sysadmins don&#39;t think that separate layers for <a href="https://en.wikipedia.org/wiki/Web_cache">HTTP caching</a> --- like <a href="https://varnish-cache.org/">Varnish</a> --- make much sense. Perhaps it is less elaborate, but <em><a href="https://speakerdeck.com/lukasa/simplicity-is-a-feature">simplicity is a feature</a>.</em> Enabling caching with Nginx is rather simple.</p>
+<pre><code class="lang-cnf">proxy_cache_path /path/to/cache levels=1:2 keys_zone=my_cache:10m max_size=10g
+    inactive=60m;
+</code></pre>
+<p>This is a directive we place in our virtual host file, <strong>outside</strong> of the <code>server</code> block. The <code>proxy_cache_path</code> argument can be any path we want to store our cache. <code>levels</code> designates how many levels of directories Nginx should store cached content in. For performance reasons, two levels are usually okay. Recursing through the directories can be costly. The <code>keys_zone</code> argument is a name for a shared memory zone used for storing the cache keys, and <code>10m</code> is room for those keys in memory (10MB is usually enough; this isn&#39;t the room for actual cached content). <code>max_size</code> is optional, and sets the upper limit for the cached content --- here 10GB. If this isn&#39;t specified, it will take up all the available space. <code>inactive</code> specifies how long the content can stay in the cache without being requested, before it gets deleted by Nginx.</p>
+<p>Having set this up, we would add the following line, with the name of our memory zone to either <code>server</code> or <code>location</code> block:</p>
+<pre><code class="lang-cnf">proxy_cache my_cache;
+</code></pre>
+<p>An extra layer of fault-tolerance with Nginx can be achieved by telling it to serve the items from cache when it encounters a server error on the origin, or the upstream server, or when the server is down:</p>
+<pre><code class="lang-cnf">proxy_cache_use_stale error timeout http_500 http_502 http_503 http_504;
+</code></pre>
+<p>More details about the <code>server</code> or <code>location</code> block directives to further tune Nginx caching can be found <a href="https://www.nginx.com/blog/nginx-caching-guide/">here</a>.</p>
+<p><code>proxy_cache_*</code> directives are for static assets, but we usually want to cache the dynamic output of our web apps --- whether it&#39;s a CMS or something else. In this case, we&#39;ll use the <code>fastcgi_cache_*</code> directive instead of <code>proxy_cache_*</code>:</p>
+<pre><code class="lang-cnf">fastcgi_cache_path /var/run/nginx-cache levels=1:2 keys_zone=my_cache:10m inactive=60m;
+fastcgi_cache_key &quot;$scheme$request_method$host$request_uri&quot;;
+fastcgi_cache_use_stale error timeout invalid_header http_500;
+fastcgi_ignore_headers Cache-Control Expires Set-Cookie;
+add_header NGINX_FASTCGI_CACHE $upstream_cache_status;
+</code></pre>
+<p>The last line above will set response headers to inform us whether the content was delivered from the cache or not.</p>
+<p>Then, in our server or location block, we can set some exceptions to caching --- for example, when the query string is present in the request URL:</p>
+<pre><code class="lang-cnf">if ($query_string != &quot;&quot;) {
+    set $skip_cache 1;
+}
+</code></pre>
+<p>Also, in our <code>\.php</code> block, inside <code>server</code>, in case of PHP, we would add something like:</p>
+<pre><code class="lang-cnf">location ~ \.php$ {
+    try_files $uri =404;
+    include fastcgi_params;
+
+    fastcgi_read_timeout 360s;
+    fastcgi_buffer_size 128k;
+    fastcgi_buffers 4 256k;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+
+    fastcgi_pass unix:/run/php/php7.0-fpm.sock;
+
+        fastcgi_index index.php;
+        fastcgi_cache_bypass $skip_cache;
+        fastcgi_no_cache $skip_cache;
+        fastcgi_cache my_cache;
+        fastcgi_cache_valid  60m;
+}
+</code></pre>
+<p>Above, the <code>fastcgi_cache*</code> lines, and <code>fastcgi_no_cache</code>, regulate caching and exclusions. Detailed reference of all these directives can be found <a href="http://nginx.org/en/docs/dirindex.html">on the Nginx docs website</a>.</p>
+<p>To learn more, the people over at Nginx have provided a <a href="https://www.nginx.com/resources/webinars/installing-tuning-nginx/">free webinar</a> on this topic, and there&#39;s a <a href="https://www.nginx.com/resources/library/">number of ebooks</a> available.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>We&#39;ve tried to introduce some techniques that will help us improve our web server&#39;s performance, and the theory behind those techniques. But this topic is in no way exhausted: we still haven&#39;t covered reverse-proxy setups that consist of both Apache and Nginx, or multi-server setups. Achieving the top results with both these servers is a matter of testing and analyzing specific, real-life cases. It&#39;s kind of a never-ending topic.</p>
+</div>

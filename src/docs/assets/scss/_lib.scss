@@ -1,0 +1,86 @@
+/* Mixins for common things - to change something everywhere do it here. */
+
+/* formatting */
+@mixin font-body {
+    font-family: font(body, family);
+    font-weight: font(body, weight);
+    font-size: font(body, size);
+    line-height: font(body, line-height);
+}
+
+@mixin font-title {
+    font-family: font(title, family);
+    font-weight: font(title, weight);
+    font-size: font(title, size);
+    line-height: font(title, line-height);
+}
+
+@mixin font-monospace {
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    font-weight: font(code, weight);
+    font-size: font(code, size);
+    line-height: font(code, line-height);
+}
+
+@mixin font-footnotes {
+    font-family: font(footnotes, family);
+    font-weight: font(footnotes, weight);
+    font-size: font(footnotes, size);
+    line-height: font(footnotes, line-height);
+}
+
+@mixin font-small {
+    font-family: font(small, family);
+    font-weight: font(small, weight);
+    font-size: font(small, size);
+    line-height: font(small, line-height);
+}
+
+@mixin box-icon {
+    content: " ";
+    height: 2.25rem;
+    width: 2.25rem;
+    display: block;
+    background-size: 2.25rem 2.25rem;
+    background-repeat: no-repeat;
+    position: absolute;
+    //top: -5pt;
+    //left:-5pt;
+}
+
+
+@function color($group, $item: 'default') {
+    @return map-get(map-get($colors, $group), $item);
+}
+
+@function font($group, $item: 'default') {
+    @return map-get(map-get($fonts, $group), $item);
+}
+
+/* tables with a nod to this post: http://jennifermann.ghost.io/setting-fixed-table-widths-using-sass/ */
+@mixin th-width($col, $width) {
+    #{$col} {
+        width: $width;
+    }
+}
+
+@mixin table-columns($widths...) {
+    table-layout: fixed;
+    width: 100%;
+
+    th, td {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    $n: 1;
+    $var: "th:nth-child(" + $n + ")";
+    @each $width in $widths {
+        @include th-width($var, $width);
+        $n: $n + 1;
+        $var: "th:nth-child(" + $n + ")";
+    }
+}
+
+
