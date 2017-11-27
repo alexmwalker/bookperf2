@@ -1,6 +1,6 @@
 ---
 template: front-matter.pug
-title: Front-end Performance
+title: Back-end Performance
 author: ''
 productmanager: Simon Mackie
 englisheditor: Ralph Mason
@@ -18,7 +18,7 @@ This book is a collection of articles, selected from SitePoint's [React Hub](htt
 
 ## Who Should Read This Book?
 
-This book is for all Frontend developers that want to build sites and apps that run faster. You’ll need to be familiar with HTML and CSS and have a reasonable level of understanding of JavaScript in order to follow the discussion. 
+This book is for all Back-end Developers that want to build sites and apps that run faster. You’ll need to be familiar with HTML and CSS and have a reasonable level of understanding of JavaScript in order to follow the discussion. 
 
 ## Conventions Used
 
