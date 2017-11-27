@@ -35,7 +35,9 @@
   |     
   p
     | Rather than indicating every occurrence of a trademarked name as such, this book uses the names only in an editorial fashion and to the benefit of the trademark owner with no intention of infringement of the trademark.
-  |     
+  |
+.page-about.front.set-front-matter    
+     
   .small-centered
     p
       img(src="../images/sitepoint-gray.svg", alt="SitePoint logo", width="160")
@@ -56,26 +58,24 @@
     //-p ISBN: #{$.isbnweb}
     br
     |  Printed and bound in the United States of America
-.page-about.front.set-front-matter    
   h2#about-sitepoint About SitePoint
   |     
   p
     | SitePoint specializes in publishing fun, practical, and easy-to-understand content for web professionals. Visit 
     a.uri(href="http://www.sitepoint.com/") http://www.sitepoint.com/
     |  to access our blogs, books, newsletters, articles, and community forums. You’ll find a stack of information on JavaScript, PHP, Ruby, mobile development, design, and more.
+
 .page-toc.front.set-front-matter
+
   h1#table-of-contents Table of Contents
   |     
-  ul
+  ul#insert-toc.toc
 
 
 
 .preface.set-front-matter
-  h1#preface Preface
-
-  =! html
-  
-
+  |
+  != html
 
   h3#preface-tips.breakbefore Tips, Notes, and Warnings
   .box.tip
