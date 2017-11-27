@@ -85,82 +85,62 @@
     src: url($local-path+"src/assets/fonts/chiantiBT_bolditalic.TTF")
 }
 
-/* Melior */
+/* Libre Franklin */
 @font-face {
     font-family: "Libre Franklin";
     font-style: normal;
     font-weight: normal;
-    src: url($local-path+"src/assets/fonts/MeliorLTStd.otf")
+    src: url($local-path+"src/docs/assets/fonts/libre-franklin/LibreFranklin-Regular.otf");
 }
 
 @font-face {
     font-family: "Libre Franklin";
     font-style: italic;
     font-weight: normal;
-    src: url($local-path+"src/assets/fonts/MeliorLTStd-Italic.otf")
+    src: url($local-path+"src/docs/assets/fonts/libre-franklin/LibreFranklin-Italic.otf")
 }
 
 @font-face {
-    font-family: "Libre Franklin"";
+    font-family: "Libre Franklin";
     font-style: normal;
     font-weight: bold;
-    src: url($local-path+"src/assets/fonts/MeliorLTStd-Bold.otf")
+    src: url($local-path+"src/docs/assets/fonts/libre-franklin/LibreFranklin-Bold.otf")
 }
 
 @font-face {
-    font-family: "Libre Franklin"";
+    font-family: "Libre Franklin";
     font-style: italic;
     font-weight: bold;
-    src: url($local-path+"src/assets/fonts/MeliorLTStd-BoldItalic.otf")
+    src: url($local-path+"src/docs/assets/fonts/libre-franklin/LibreFranklin-BoldItalic.otf")    
 }
 
-/* Rotis */
-@font-face {
-    font-family: "Libre Franklin"";
-    font-style: normal;
-    font-weight: normal;
-    src: url($local-path+"src/assets/fonts/RotisSemiSansStd.otf")
-}
 
-@font-face {
-    font-family: "Libre Franklin"";
-    font-style: italic;
-    font-weight: normal;
-    src: url($local-path+"src/assets/fonts/RotisSemiSansStd-Italic.otf")
-}
 
-@font-face {
-    font-family: "Libre Franklin"";
-    font-style: normal;
-    font-weight: bold;
-    src: url($local-path+"src/assets/fonts/RotisSemiSansStd-Bold.otf")
-}
-
-/* StoneSans */
+/* Raleway */
 @font-face {
     font-family: "Raleway";
     font-style: normal;
     font-weight: normal;
-    src: url($local-path+"src/assets/fonts/StoneSansStd-Medium.otf")
+    src: url($local-path+"src/docs/assets/fonts/raleway/Raleway-Medium.otf")    
 }
 
 @font-face {
     font-family: "Raleway";
     font-style: italic;
     font-weight: normal;
-    src: url($local-path+"src/assets/fonts/StoneSansStd-MediumItalic.otf")
+    src: url($local-path+"src/docs/assets/fonts/raleway/Raleway-MediumItalic.otf")    
 }
 
 @font-face {
     font-family: "Raleway";
     font-style: normal;
     font-weight: bold;
-    src: url($local-path+"src/assets/fonts/StoneSansStd-Bold.otf")
+    src: url($local-path+"src/docs/assets/fonts/raleway/Raleway-Bold.otf")    
 }
 
 @font-face {
     font-family: "Raleway";
     font-style: italic;
     font-weight: bold;
-    src: url($local-path+"src/assets/fonts/StoneSansStd-BoldItalic.otf")
+    src: url($local-path+"src/docs/assets/fonts/raleway/Raleway-BoldItalic.otf")    
 }
