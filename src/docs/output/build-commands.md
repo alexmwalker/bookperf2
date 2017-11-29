@@ -22,7 +22,7 @@ The very end of the commend has your output file. Something like `..lastinputfil
 
 ### PRINCE conversion to PDF - sexy mutha..
 
-    prince book.html -o covertest.pdf --javascript
+    prince book.html -o backend-performance.pdf --javascript
 
 ### Rewriting an image URL from SitePoint to local (from that folder)
 

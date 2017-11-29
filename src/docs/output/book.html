@@ -85,6 +85,9 @@
         <div id="hero"></div>
     </section>
 
+
+
+    <!--cover ends -->
     <div class="page-frontmatter front set-front-matter">
         <div class="title-name">
             <h2 id="maintitle">Back-end Performance </h2>
@@ -125,8 +128,9 @@
             <br/> Printed and bound in the United States of America</div>
         <h2 id="about-sitepoint">About SitePoint</h2>
         <p>SitePoint specializes in publishing fun, practical, and easy-to-understand content for web professionals. Visit
-            <a class="uri" href="http://www.sitepoint.com/">http://www.sitepoint.com/</a> to access our blogs, books, newsletters, articles, and community forums. You’ll
-            find a stack of information on JavaScript, PHP, Ruby, mobile development, design, and more.</p>
+            <a
+                class="uri" href="http://www.sitepoint.com/">http://www.sitepoint.com/</a> to access our blogs, books, newsletters, articles, and community forums. You’ll
+                find a stack of information on JavaScript, PHP, Ruby, mobile development, design, and more.</p>
     </div>
     <div class="page-toc front set-front-matter">
         <h1 id="table-of-contents">Table of Contents</h1>
@@ -152,20 +156,20 @@
         <h3 id="code-samples">Code Samples</h3>
         <p>Code in this book is displayed using a fixed-width font, like so: </p>
         <pre><code class="lang-html">&lt;h1&gt;A Perfect Summer&#39;s Day&lt;/h1&gt;
-  &lt;p&gt;It was a lovely day for a walk in the park.
-  The birds were singing and the kids were all back at school.&lt;/p&gt;
-  </code></pre>
+&lt;p&gt;It was a lovely day for a walk in the park.
+The birds were singing and the kids were all back at school.&lt;/p&gt;
+</code></pre>
         <p>Where existing code is required for context, rather than repeat all of it, ⋮ will be displayed:</p>
         <pre><code class="lang-js">function animate() {
-    ⋮
-  new_variable = &quot;Hello&quot;;
-  }
-  </code></pre>
+  ⋮
+new_variable = &quot;Hello&quot;;
+}
+</code></pre>
         <p>Some lines of code should be entered on one line, but we’ve had to wrap them because of page constraints. An ➥ indicates
             a line break that exists for formatting purposes only, and should be ignored:</p>
         <pre><code class="lang-js">URL.open(&quot;http://www.sitepoint.com/responsive-web-
-  ➥design-real-user-testing/?responsive1&quot;);
-  </code></pre>
+➥design-real-user-testing/?responsive1&quot;);
+</code></pre>
         <h3 class="breakbefore" id="preface-tips">Tips, Notes, and Warnings</h3>
         <div class="box tip">
             <h4>Hey, You!</h4>
@@ -194,11 +198,9 @@
         </div>
     </div>
     <!-- End front matter-->
-
-
     <div class="chapter">
         <div class="ch-head">Chapter</div>
-        <h1 class="chaptertitle"> How to Optimize MySQL: Indexes, Slow Queries, Configuration</h1>
+        <h1 class="chaptertitle" id="howtooptimizemysql:indexes,slowqueries,configuration"> How to Optimize MySQL: Indexes, Slow Queries, Configuration</h1>
         <h3 class="author">Bruno Škvorc</h3>
         <p>MySQL is still the world&#39;s most popular relational database, and yet, it&#39;s still the most unoptimized - many
             people leave it at default values, not bothering to investigate further. In this article, we&#39;ll look at some
@@ -381,10 +383,10 @@ ADD UNIQUE INDEX `username` (`username`);
         <p>Both primary keys and unique keys can be made on a single column or multiple columns at once. For example, if you
             want to make sure only one username per country can be defined, you make a unique index on both of those columns,
             like so:</p>
-        <pre><code class="lang-sql">    ...
-    ALTER TABLE `users`
-    ADD UNIQUE INDEX `usercountry` (`username`, `country`),
-    ...
+        <pre><code class="lang-sql">...
+ALTER TABLE `users`
+ADD UNIQUE INDEX `usercountry` (`username`, `country`),
+...
 </code></pre>
         <p>Unique indexes are put onto columns which you&#39;ll address often. So if the user account is frequently requested
             and you have many user accounts in the database, that&#39;s a good use case.</p>
@@ -557,7 +559,7 @@ b0_.created DESC LIMIT 10
     </div>
     <div class="chapter">
         <div class="ch-head">Chapter</div>
-        <h1 class="chaptertitle"> How to Read Big Files with PHP (Without Killing Your Server)</h1>
+        <h1 class="chaptertitle" id="howtoreadbigfileswithphp(withoutkillingyourserver)"> How to Read Big Files with PHP (Without Killing Your Server)</h1>
         <h3 class="author">Chris Pitt</h3>
         <p>It’s not often that we, as PHP developers, need to worry about memory management. The PHP engine does a stellar job
             of cleaning up after us, and the web server model of short-lived execution contexts means even the sloppiest
@@ -1004,7 +1006,7 @@ stream_filter_append($handle, &quot;highlight-names&quot;, STREAM_FILTER_READ);
     </div>
     <div class="chapter">
         <div class="ch-head">Chapter</div>
-        <h1 class="chaptertitle"> WordPress Optimization</h1>
+        <h1 class="chaptertitle" id="wordpressoptimization"> WordPress Optimization</h1>
         <h3 class="author">Tonino Jankov</h3>
         <p>According to
             <a href="https://builtwith.com">Builtwith.com</a>, WordPress
@@ -1384,7 +1386,7 @@ stream_filter_append($handle, &quot;highlight-names&quot;, STREAM_FILTER_READ);
     </div>
     <div class="chapter">
         <div class="ch-head">Chapter</div>
-        <h1 class="chaptertitle"> How to Optimize SQL Queries for Faster Sites</h1>
+        <h1 class="chaptertitle" id="howtooptimizesqlqueriesforfastersites"> How to Optimize SQL Queries for Faster Sites</h1>
         <h3 class="author">Iain Poulson</h3>
         <p>
             <em>This article was originally published on the
@@ -1842,7 +1844,7 @@ ORDER BY s.next_payment_date
     </div>
     <div class="chapter">
         <div class="ch-head">Chapter</div>
-        <h1 class="chaptertitle"> HTTP/2: Background, Performance Benefits and Implementations</h1>
+        <h1 class="chaptertitle" id="http/2:background,performancebenefitsandimplementations"> HTTP/2: Background, Performance Benefits and Implementations</h1>
         <h3 class="author">Tonino Jankov</h3>
         <p>On top of the infrastructure of the internet --- or the physical network layers --- sits the Internet Protocol, as
             part of the TCP/IP, or transport layer. It&#39;s the fabric underlying all or most of our internet communications.</p>
@@ -2029,7 +2031,7 @@ Supported protocols: grpc-exp h2 HTTP/1.1
     </div>
     <div class="chapter">
         <div class="ch-head">Chapter</div>
-        <h1 class="chaptertitle"> Apache vs Nginx Performance: Optimization Techniques</h1>
+        <h1 class="chaptertitle" id="apachevsnginxperformance:optimizationtechniques"> Apache vs Nginx Performance: Optimization Techniques</h1>
         <h3 class="author">Tonino Jankov</h3>
         <p>Some years ago, the
             <a href="https://httpd.apache.org/">Apache Foundation&#39;s web server</a>, known simply as &quot;Apache&quot;, was so ubiquitous that it became
@@ -2523,7 +2525,7 @@ add_header NGINX_FASTCGI_CACHE $upstream_cache_status;
     </div>
     <div class="chapter">
         <div class="ch-head">Chapter</div>
-        <h1 class="chaptertitle"> An In-depth Walkthrough of Supercharging Apps with Blackfire</h1>
+        <h1 class="chaptertitle" id="anin-depthwalkthroughofsuperchargingappswithblackfire"> An In-depth Walkthrough of Supercharging Apps with Blackfire</h1>
         <h3 class="author">Reza Lavaryan</h3>
         <p>No one hates robust and scalable applications, especially when the database is growing quickly, and millions of requests
             need to be served on a daily basis. Profiling is a form of program analysis to measure the time and resources
@@ -3065,7 +3067,7 @@ echo &#39;Users imported successfully.&#39;;
     </div>
     <div class="chapter">
         <div class="ch-head">Chapter</div>
-        <h1 class="chaptertitle"> How to Boost Your Server Performance with Varnish</h1>
+        <h1 class="chaptertitle" id="howtoboostyourserverperformancewithvarnish"> How to Boost Your Server Performance with Varnish</h1>
         <h3 class="author">Tonino Jankov</h3>
         <p>Varnish Cache is an
             <a href="https://en.wikipedia.org/wiki/Web_accelerator">HTTP accelerator</a> and
@@ -3377,7 +3379,7 @@ pm2 start index.js
     </div>
     <div class="chapter">
         <div class="ch-head">Chapter</div>
-        <h1 class="chaptertitle"> How to Process Server Logs</h1>
+        <h1 class="chaptertitle" id="howtoprocessserverlogs"> How to Process Server Logs</h1>
         <h3 class="author">Daniel Berman</h3>
         <p>When things go south with our applications -- as they sometimes do, whether we like it or not -- our log files are
             normally among the first places where we go when we start the troubleshooting process. The big “but” here is
@@ -3672,7 +3674,7 @@ exit
     </div>
     <div class="chapter">
         <div class="ch-head">Chapter</div>
-        <h1 class="chaptertitle"> Web App Performance Testing with Siege: Plan, Test, Learn</h1>
+        <h1 class="chaptertitle" id="webappperformancetestingwithsiege:plan,test,learn"> Web App Performance Testing with Siege: Plan, Test, Learn</h1>
         <h3 class="author">Zoran Antolovic</h3>
         <p>
             <em>This article was peer reviewed by

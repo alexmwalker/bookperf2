@@ -160,10 +160,10 @@ Primary keys/indexes are usually defined on table creation, and unique indexes a
 Both primary keys and unique keys can be made on a single column or multiple columns at once. For example, if you want to make sure only one username per country can be defined, you make a unique index on both of those columns, like so:
 
 ```sql
-    ...
-    ALTER TABLE `users`
-    ADD UNIQUE INDEX `usercountry` (`username`, `country`),
-    ...
+...
+ALTER TABLE `users`
+ADD UNIQUE INDEX `usercountry` (`username`, `country`),
+...
 ```
 
 Unique indexes are put onto columns which you'll address often. So if the user account is frequently requested and you have many user accounts in the database, that's a good use case.

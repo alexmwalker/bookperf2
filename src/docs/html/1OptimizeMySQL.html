@@ -1,4 +1,4 @@
-<div class="chapter"><div class="ch-head">Chapter</div>    <h1 class="chaptertitle"> How to Optimize MySQL: Indexes, Slow Queries, Configuration</h1>    <h3 class="author">Bruno Škvorc</h3><p>MySQL is still the world&#39;s most popular relational database, and yet, it&#39;s still the most unoptimized - many people leave it at default values, not bothering to investigate further. In this article, we&#39;ll look at some MySQL optimization tips we&#39;ve covered previously, and combine them with novelties that came out since.</p>
+<div class="chapter"><div class="ch-head">Chapter</div>    <h1 class="chaptertitle" id="howtooptimizemysql:indexes,slowqueries,configuration"> How to Optimize MySQL: Indexes, Slow Queries, Configuration</h1>    <h3 class="author">Bruno Škvorc</h3><p>MySQL is still the world&#39;s most popular relational database, and yet, it&#39;s still the most unoptimized - many people leave it at default values, not bothering to investigate further. In this article, we&#39;ll look at some MySQL optimization tips we&#39;ve covered previously, and combine them with novelties that came out since.</p>
 <h2 id="configuration-optimization">Configuration Optimization</h2>
 <p>The first - and most skipped! - performance upgrade every user of MySQL should do is tweak the configuration. 5.7 (the current version) has much better defaults than its predecessors, but it&#39;s still easy to make improvements on top of those.</p>
 <p>We&#39;ll assume you&#39;re using a Linux-based host or a good <a href="http://www.sitepoint.com/re-introducing-vagrant-right-way-start-php/">Vagrant</a> box like our <a href="http://www.sitepoint.com/quick-tip-get-homestead-vagrant-vm-running/">Homestead Improved</a> so your configuration file will be in <code>/etc/mysql/my.cnf</code>. It&#39;s possible that your installation will actually load a secondary configuration file into that configuration file, so look into that - if the <code>my.cnf</code> file doesn&#39;t have much content, the file <code>/etc/mysql/mysql.conf.d/mysqld.cnf</code> might.</p>
@@ -97,10 +97,10 @@ ADD UNIQUE INDEX `username` (`username`);
 </code></pre>
 <p>Primary keys/indexes are usually defined on table creation, and unique indexes are defined after the fact by altering the table.</p>
 <p>Both primary keys and unique keys can be made on a single column or multiple columns at once. For example, if you want to make sure only one username per country can be defined, you make a unique index on both of those columns, like so:</p>
-<pre><code class="lang-sql">    ...
-    ALTER TABLE `users`
-    ADD UNIQUE INDEX `usercountry` (`username`, `country`),
-    ...
+<pre><code class="lang-sql">...
+ALTER TABLE `users`
+ADD UNIQUE INDEX `usercountry` (`username`, `country`),
+...
 </code></pre>
 <p>Unique indexes are put onto columns which you&#39;ll address often. So if the user account is frequently requested and you have many user accounts in the database, that&#39;s a good use case.</p>
 <h3 id="regular-indexes">Regular Indexes</h3>
