@@ -174,7 +174,7 @@ eg.
 */
 
 function buildStructure() {
-  var listImages = document.querySelectorAll("img");
+  var listImages = document.querySelectorAll(".chapter img");
 
   for (var i = listImages.length - 1; i >= 0; i--) {
     var original = listImages[i];
