@@ -1,117 +1,34 @@
-/* importing fonts we use
-
-@font-face {
-    font-family: "arrus";
-    font-style: normal;
-    font-weight: normal;
-    src: url($local-path+"src/assets/fonts/arrusBT_roman.TTF")
-}
-
-@font-face {
-    font-family: "arrus";
-    font-style: italic;
-    font-weight: normal;
-    src: url($local-path+"src/assets/fonts/arrusBT_italic.TTF")
-}
-
-@font-face {
-    font-family: "arrus";
-    font-style: normal;
-    font-weight: bold;
-    src: url($local-path+"src/assets/fonts/arrusBT_bold.TTF")
-}
-
-@font-face {
-    font-family: "arrus";
-    font-style: italic;
-    font-weight: bold;
-    src: url($local-path+"src/assets/fonts/arrusBT_bolditalic.TTF")
-}
-
-@font-face {
-    font-family: 'PT Mono', monospace;
-    font-style: normal;
-    font-weight: normal;
-    src: url($local-path+"src/assets/fonts/Monospac821BT_roman.TTF")
-}
-
-@font-face {
-    font-family: 'PT Mono', monospace;
-    font-style: italic;
-    font-weight: normal;
-    src: url($local-path+"src/assets/fonts/Monospac821BT_italic.TTF")
-}
-
-@font-face {
-    font-family: 'PT Mono', monospace;
-    font-style: normal;
-    font-weight: bold;
-    src: url($local-path+"src/assets/fonts/Monospac821BT_bold.TTF")
-}
-
-@font-face {
-    font-family: 'PT Mono', monospace;
-    font-style: italic;
-    font-weight: bold;
-    src: url($local-path+"src/assets/fonts/Monospac821BT_bolditalic.TTF")
-}
+/* importing fonts we use */
 
 
-@font-face {
-    font-family: "Raleway";
-    font-style: normal;
-    font-weight: normal;
-    src: url($local-path+"src/assets/fonts/chiantiBT_roman.TTF")
-}
-
-@font-face {
-    font-family: "Raleway";
-    font-style: italic;
-    font-weight: normal;
-    src: url($local-path+"src/assets/fonts/chiantiBT_italic.TTF")
-}
-
-@font-face {
-    font-family: "Raleway";
-    font-style: normal;
-    font-weight: bold;
-    src: url($local-path+"src/assets/fonts/chiantiBT_bold.TTF")
-}
-
-@font-face {
-    font-family: "Raleway";
-    font-style: italic;
-    font-weight: bold;
-    src: url($local-path+"src/assets/fonts/chiantiBT_bolditalic.TTF")
-}
 
 /* Libre Franklin */
 @font-face {
     font-family: "Libre Franklin";
     font-style: normal;
     font-weight: normal;
-    src: url($local-path+"src/docs/assets/fonts/libre-franklin/LibreFranklin-Regular.otf");
+    src: url($local-path+"../fonts/libre-franklin/LibreFranklin-Regular.otf");
 }
 
 @font-face {
     font-family: "Libre Franklin";
     font-style: italic;
     font-weight: normal;
-    src: url($local-path+"src/docs/assets/fonts/libre-franklin/LibreFranklin-Italic.otf")
+    src: url($local-path+"../fonts/libre-franklin/LibreFranklin-Italic.otf")
 }
 
 @font-face {
     font-family: "Libre Franklin";
     font-style: normal;
     font-weight: bold;
-    src: url($local-path+"src/docs/assets/fonts/libre-franklin/LibreFranklin-Bold.otf")
+    src: url($local-path+"../fonts/libre-franklin/LibreFranklin-Bold.otf")
 }
 
 @font-face {
     font-family: "Libre Franklin";
     font-style: italic;
     font-weight: bold;
-    src: url($local-path+"src/docs/assets/fonts/libre-franklin/LibreFranklin-BoldItalic.otf")    
+    src: url($local-path+"../fonts/libre-franklin/LibreFranklin-BoldItalic.otf")    
 }
 
 
@@ -121,26 +38,26 @@
     font-family: "Raleway";
     font-style: normal;
     font-weight: normal;
-    src: url($local-path+"src/docs/assets/fonts/raleway/Raleway-Medium.otf")    
+    src: url($local-path+"../fonts/raleway/Raleway-Medium.otf")    
 }
 
 @font-face {
     font-family: "Raleway";
     font-style: italic;
     font-weight: normal;
-    src: url($local-path+"src/docs/assets/fonts/raleway/Raleway-MediumItalic.otf")    
+    src: url($local-path+"../fonts/raleway/Raleway-MediumItalic.otf")    
 }
 
 @font-face {
     font-family: "Raleway";
     font-style: normal;
     font-weight: bold;
-    src: url($local-path+"src/docs/assets/fonts/raleway/Raleway-Bold.otf")    
+    src: url($local-path+"../fonts/raleway/Raleway-Bold.otf")    
 }
 
 @font-face {
     font-family: "Raleway";
     font-style: italic;
     font-weight: bold;
-    src: url($local-path+"src/docs/assets/fonts/raleway/Raleway-BoldItalic.otf")    
+    src: url($local-path+"../fonts/raleway/Raleway-BoldItalic.otf")    
 }

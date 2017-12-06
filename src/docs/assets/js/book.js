@@ -16,7 +16,7 @@ spBook.Settings = function () {
   return {
     fixedLine: 60,
     breakInsert: "<br>➥ ",
-    tocSelectors: '.preface h1,.chapter h1,.chapter h2,.appendix h1',
+    tocSelectors: '.preface h1, .preface h2, .chapter h1, .chapter h2',
     tocHasPreface: true,
   }
 
@@ -34,7 +34,7 @@ spBook.Setup.Global = function () {
 
     initToc();
     initLineBreaks();
-
+    buildStructure();
   };
 
   /* build the table of contents. All headings in the document need an ID, this is how links are created so I skip any heading that has no ID. We also only select headings inside a div with a class of preface, or a div with a class of chapter. Add any other page types that should be selected in the list of selectors.
@@ -162,6 +162,50 @@ spBook.Setup.Global = function () {
     });
 
   }
+
+/* This function finds plain ol' IMG tags and rebuilds them in a nice figure/caption structure that is better for nice layouts.
+
+eg.
+<figure>
+  <img src="image.jpg" alt="This will be the caption">
+  <figcation>This will be the caption</figcaption>
+</figure>
+
+*/
+
+function buildStructure() {
+  var listImages = document.querySelectorAll("img");
+
+  for (var i = listImages.length - 1; i >= 0; i--) {
+    var original = listImages[i];
+
+    var imgsrc = listImages[i].src;
+    var imgalt = listImages[i].alt;
+    //console.log(listImages[i].alt); 
+
+    var figureSet = document.createElement('figure');
+    var figImage = document.createElement('img');
+    figImage.setAttribute("src", imgsrc);
+    figImage.setAttribute("alt", imgalt);
+
+    var figCap = document.createElement('figcaption');
+    figCap.innerHTML = imgalt;  
+
+    figureSet.appendChild(figImage);
+    figureSet.appendChild(figCap);
+
+    original.parentNode.replaceChild(figureSet, listImages[i]);
+
+  }
+}
+
+
+
+
+
+
+
+
 
 
   return {

@@ -64,12 +64,12 @@ top left book title and current page */
   }
 }
 
-@page cover {
+@page cover_page {
   margin: 0!important;
   padding: 0!important;
 }
 
-.set-cover { page: cover }
+.set-cover { page: cover_page }
 
 /* add this class to any front matter page that should have roman numeral style numbering */
 .set-front-matter { page: front_matter }
@@ -118,6 +118,10 @@ figcaption:before {
 table caption:before {
 	counter-increment: tablenum;
 	content: counter(chapternum) "." counter(tablenum) ". ";
+}
+
+figcaption{
+  font-size: 0.8rem;
 }
 
 /* footnotes */

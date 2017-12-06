@@ -6,7 +6,7 @@ Details: A stylesheet for formatting SitePoint books. This stylesheet imports th
 /* import other stylesheets */
 @import 'prism';
 @import 'config';
-//@import 'fonts';  currently the old fonts
+@import 'fonts';  //currently the old fonts
 @import 'lib';
 @import 'page-setup';
 @import 'typography';

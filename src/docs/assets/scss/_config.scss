@@ -1,5 +1,5 @@
 /* defining things that might change from book to book */
-$book-title: "Front End Performance";
+$book-title: "Back-End Performance";
 $cover-color: #A8CE35;
 /* path to book folder */
 //$local-path: "/Users/simon/Documents/sp-book-print-css/";
@@ -18,9 +18,8 @@ $base-font-size: 12pt;                      // works out to be 16px on screen
 $base-line-height: $base-font-size * 1.5;
 $base-grid-height: $base-line-height / 2;   // two gridlines for each base font
 
-@import url('https://fonts.googleapis.com/css?family=Libre+Franklin|Raleway');
-
-
+@import url('https://fonts.googleapis.com/css?family=Libre+Franklin:300,300i,400,400i,500,700|Raleway:400,600,700&amp;subset=latin-ext');
+  
 /* typography
 fonts are imported in _fonts.scss -- but
 */

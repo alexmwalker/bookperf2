@@ -1,3 +1,49 @@
+/*  cover standards  */
+
+section#cover{
+    background-color: $cover-color;
+    background-size: 100% auto;
+    color: #fff;
+    font-family: Raleway, sans-serif;
+    width: 8in;
+    height: 10in;
+    position: relative;
+}
+#cover div#cover-logo {
+    background: url(../images/svg/sitepoint-white.svg) no-repeat;
+    position: absolute;
+    top: .75in;
+    right: 4em;
+    width: 2in;
+    height: 0.5in;
+}
+
+#cover h1.title {
+    font-size: 75pt;
+    font-weight: normal;
+    line-height: 60pt;
+    color: #fff;
+    letter-spacing: -2px;
+    text-align: right;
+    text-transform: uppercase;
+    margin: 2.2in .2em 0 0;
+    position: absolute;
+}
+
+#cover h3.tagline {
+    font-size: 15pt;
+    font-weight: 700;
+    line-height: 1.5;
+    color: #fff;
+    position: absolute;
+    text-transform: uppercase;
+    top: 8.75in;
+    width: 7.9in;
+    text-align: center;
+}
+
+/*  feature boxes  */
+
 .box {
     background-color: color(backgrounds, box-body);
     margin: 1.5rem 0 1.5rem 0rem;
@@ -72,14 +118,16 @@
     @include box-icon;
 }
 
-/* code*/
+
 figure{
     margin: 0;
     -webkit-margin-before: 0em;
     -webkit-margin-after: 0em;
     -webkit-margin-start: 0px;
     -webkit-margin-end: 0px;
+    margin-bottom: 1.5rem;
 }
+/* code
 .codeblock {
     @include font-monospace;
     //background-color: color(backgrounds, codeblock);
@@ -111,7 +159,7 @@ pre[class*="language-"] {
     margin: 0 0 1.5rem 0;
     overflow: auto;
 }
-
+*/
 /* tables */
 table {
     border-collapse: collapse;
@@ -212,7 +260,7 @@ img {
 
 
 
-/* */
+/* blockquotes */
 blockquote {
     background: #f0f2f5;
     margin: 0 0 1.5rem;
