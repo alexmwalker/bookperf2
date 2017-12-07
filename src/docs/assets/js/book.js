@@ -164,13 +164,19 @@ spBook.Setup.Global = function () {
   }
 
 /* This function finds plain ol' IMG tags and rebuilds them in a nice figure/caption structure that is better for nice layouts.
-
 eg.
+<img src="image.jpg" alt="This will be the caption">
+
+becomes..
+
 <figure>
   <img src="image.jpg" alt="This will be the caption">
   <figcation>This will be the caption</figcaption>
 </figure>
 
+Note that IMGs with alt attributes beginning with a hyphen '-' will be ignored.
+
+eg. <img src="image.jpg" alt="- This will be the caption">
 */
 
 function buildStructure() {
@@ -181,21 +187,22 @@ function buildStructure() {
 
     var imgsrc = listImages[i].src;
     var imgalt = listImages[i].alt;
-    //console.log(listImages[i].alt); 
+    console.log(imgalt.slice(0,1)); 
+    if(imgalt.slice(0,1) != "-"){
 
-    var figureSet = document.createElement('figure');
-    var figImage = document.createElement('img');
-    figImage.setAttribute("src", imgsrc);
-    figImage.setAttribute("alt", imgalt);
+      var figureSet = document.createElement('figure');
+      var figImage = document.createElement('img');
+      figImage.setAttribute("src", imgsrc);
+      figImage.setAttribute("alt", imgalt);
 
-    var figCap = document.createElement('figcaption');
-    figCap.innerHTML = imgalt;  
+      var figCap = document.createElement('figcaption');
+      figCap.innerHTML = imgalt;  
 
-    figureSet.appendChild(figImage);
-    figureSet.appendChild(figCap);
+      figureSet.appendChild(figImage);
+      figureSet.appendChild(figCap);
 
-    original.parentNode.replaceChild(figureSet, listImages[i]);
-
+      original.parentNode.replaceChild(figureSet, listImages[i]);
+    }
   }
 }
 
@@ -215,9 +222,6 @@ function countDuplicate() {
 }
 
 //var list = document.querySelectorAll("form, p, legend");
-
-
-
 
 
 
