@@ -31,7 +31,7 @@ spBook.Setup.Global = function () {
   };
 
   var init = function () {
-
+    countDuplicate();
     initToc();
     initLineBreaks();
     buildStructure();
@@ -199,9 +199,22 @@ function buildStructure() {
   }
 }
 
+/* === Looks for Duplicate 'Conclusions' and 'Resources' headings ans 'unique-izes' their IDs ===  */
+/* === This in important when generating the TOC ===  */
 
 
+function countDuplicate() {
+  var listDupes = document.querySelectorAll("#conclusion, #resources");
+  for (var i = listDupes.length - 1; i >= 0; i--) {
+     var rewrite = (listDupes[i].id + "-" + i); 
+     console.log(rewrite); 
+     listDupes[i].setAttribute("id", rewrite);
+     console.log(listDupes[i]); 
+  }
 
+}
+
+//var list = document.querySelectorAll("form, p, legend");
 
 
 
